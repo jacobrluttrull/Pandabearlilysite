@@ -1,0 +1,33 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+
+# Node / SvelteKit (web/)
+node_modules/
+.svelte-kit/
+build/
+dist/
+.output/
+.vercel/
+
+# Go (soundboard-api/)
+*.exe
+*.exe~
+*.test
+*.out
+
+# SQLite
+*.db
+*.sqlite
+*.sqlite3
+
+# Environment
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
