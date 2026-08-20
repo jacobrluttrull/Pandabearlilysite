@@ -1,0 +1,45 @@
+/*
+ * Zenith Cream: beige is the dominant surface, forest green is a sparing
+ * accent (not the base). Base color is #af957e (your call); everything
+ * else here is a lighten/darken of that plus ink-black and the ref-sheet
+ * greens (#18340C deep, #457730 mid, #588C4E sage) used only for accents.
+ */
+:root {
+	--color-bg: #af957e;
+	--color-surface: #f6efe4;
+	--color-surface-alt: #ecdfc9;
+	--color-border: #cbb79c;
+
+	--color-ink: #1a1a18;
+	--color-on-ink: #f6efe4;
+	--color-text: var(--color-ink);
+	--color-text-muted: color-mix(in srgb, #1a1a18 60%, #af957e 40%);
+
+	--color-accent: #457730;
+	--color-accent-strong: #18340c;
+
+	--font-heading: 'Bricolage Grotesque', sans-serif;
+	--font-body: 'Plus Jakarta Sans', sans-serif;
+
+	--radius-sm: 0.25rem;
+	--radius: 0.5rem;
+	--radius-lg: 1rem;
+	--radius-xl: 1.5rem;
+	--radius-full: 9999px;
+}
+
+@media (prefers-color-scheme: dark) {
+	:root {
+		--color-bg: #1a1613;
+		--color-surface: #26211c;
+		--color-surface-alt: #352d26;
+		--color-border: #463c32;
+
+		--color-ink: #f2e6d0;
+		--color-on-ink: #1a1613;
+		--color-text-muted: color-mix(in srgb, #f2e6d0 60%, #1a1613 40%);
+
+		--color-accent: #588c4e;
+		--color-accent-strong: #457730;
+	}
+}
