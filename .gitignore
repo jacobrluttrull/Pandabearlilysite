@@ -24,6 +24,9 @@ dist/
 *.sqlite
 *.sqlite3
 
+# soundboard-api local runtime data (db file + uploaded audio)
+soundboard-api/data/
+
 # Environment
 .env
 .env.*
@@ -31,3 +34,4 @@ dist/
 
 # Logs
 *.log
+
