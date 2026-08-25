@@ -60,10 +60,7 @@
 	{#if status === 'loading'}
 		<p class="status-message">Loading clips…</p>
 	{:else if status === 'error'}
-		<p class="status-message">
-			Couldn't reach the soundboard right now. If you're running this locally, make sure the API
-			is up.
-		</p>
+		<p class="status-message">The soundboard is quiet right now — check back in a bit.</p>
 	{:else if filtered.length === 0}
 		<p class="status-message">
 			{soundbites.length === 0 ? 'No clips yet — check back soon.' : 'No clips match your search.'}

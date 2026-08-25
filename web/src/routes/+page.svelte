@@ -1,7 +1,6 @@
 <script lang="ts">
 	import links from '$lib/data/links.json';
 	import Button from '$lib/components/Button.svelte';
-	import Card from '$lib/components/Card.svelte';
 	import Chip from '$lib/components/Chip.svelte';
 </script>
 
@@ -16,35 +15,21 @@
 
 	<h1>PandaLily</h1>
 	<p class="tagline">Spirit guardian of the bamboo forest</p>
-	<p class="hero-sub">
-		Clips, streams, and every other corner of the forest — all gathered in one quiet place.
-	</p>
 
 	<div class="hero-actions">
 		<Button href="/soundboard">Enter the Soundboard</Button>
-		<Button href="#connect" variant="secondary">Find Me Elsewhere</Button>
 	</div>
 </section>
 
-<section class="directory" id="connect">
-	<div class="directory-heading">
-		<h2>Elsewhere in the Forest</h2>
-		<p>Catch streams, chat, and everything else, right here.</p>
-	</div>
-
-	<a class="featured-link" href="/soundboard">
-		<Card class="featured-card">
-			<div class="featured-icon" aria-hidden="true">♪</div>
-			<div class="featured-body">
-				<Chip class="eyebrow-chip">Featured</Chip>
-				<h3>Official Soundboard</h3>
-				<p>Clips, alerts, and sounds from the bamboo forest.</p>
-			</div>
-			<span class="chevron" aria-hidden="true">→</span>
-		</Card>
-	</a>
-
+<section class="directory">
 	<ul class="link-list">
+		<li>
+			<a href="/soundboard">
+				<span class="icon" aria-hidden="true">♪</span>
+				<span class="label">Soundboard</span>
+				<span class="chevron" aria-hidden="true">→</span>
+			</a>
+		</li>
 		{#each links as link (link.label)}
 			<li>
 				<a href={link.url} target="_blank" rel="noreferrer">
@@ -62,7 +47,7 @@
 	.hero {
 		max-width: 640px;
 		margin: 0 auto;
-		padding: var(--space-6) var(--space-3) var(--space-4);
+		padding: var(--space-4) var(--space-3) var(--space-3);
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -102,17 +87,9 @@
 	}
 
 	.hero .tagline {
-		font: var(--text-body-lg);
-		font-style: italic;
-		color: var(--color-text-muted);
+		font: var(--text-headline-md);
+		color: var(--color-text);
 		margin: 0;
-	}
-
-	.hero-sub {
-		font: var(--text-body-md);
-		color: var(--color-text-muted);
-		max-width: 34rem;
-		margin: var(--space-1) 0 0;
 	}
 
 	.hero-actions {
@@ -133,83 +110,10 @@
 	.directory {
 		max-width: 700px;
 		margin: 0 auto;
-		padding: 0 var(--space-3) var(--space-6);
+		padding: 0 var(--space-3) var(--space-4);
 		display: flex;
 		flex-direction: column;
 		gap: var(--space-3);
-	}
-
-	.directory-heading {
-		text-align: center;
-	}
-
-	.directory-heading h2 {
-		font: var(--text-headline-md);
-		margin: 0 0 0.25rem;
-	}
-
-	.directory-heading p {
-		margin: 0;
-		color: var(--color-text-muted);
-	}
-
-	.featured-link {
-		display: block;
-		color: var(--color-text);
-		text-decoration: none;
-	}
-
-	.featured-link :global(.featured-card) {
-		position: relative;
-		display: flex;
-		align-items: center;
-		gap: var(--space-3);
-		overflow: hidden;
-		border-width: 2px;
-		border-color: var(--color-accent);
-		transition: background-color 0.2s;
-	}
-
-	.featured-link :global(.featured-card)::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 4px;
-		background: var(--color-accent);
-	}
-
-	.featured-link:hover :global(.featured-card) {
-		background: var(--color-surface-alt);
-	}
-
-	.featured-icon {
-		flex-shrink: 0;
-		width: 3rem;
-		height: 3rem;
-		border-radius: 50%;
-		background: var(--color-surface-alt);
-		color: var(--color-accent-strong);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.25rem;
-	}
-
-	.featured-body {
-		flex: 1;
-	}
-
-	.featured-body h3 {
-		font: var(--text-headline-md);
-		margin: 0 0 0.25rem;
-	}
-
-	.featured-body p {
-		margin: 0;
-		color: var(--color-text-muted);
-		font: var(--text-body-md);
 	}
 
 	.chevron {

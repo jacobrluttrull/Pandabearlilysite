@@ -1,15 +1,15 @@
 /*
  * Two themes, selected via [data-theme] on the root element (see
- * PandaLily Design Pattern in CLAUDE.md): "cream" (default, light,
- * flat/papery — Zenith Cream) and "bamboo" (dark, glassmorphic — Zenith
- * Bamboo). Cream's base color is #af957e (your call); everything else
+ * PandaLily Design Pattern in CLAUDE.md): "bamboo" (default, dark,
+ * glassmorphic — Zenith Bamboo) and "cream" (light, flat/papery — Zenith
+ * Cream). Cream's base color is #a18974 (your call); everything else
  * in that theme is a lighten/darken of that plus ink-black and the
  * ref-sheet greens (#18340C deep, #457730 mid, #588C4E sage) used only
  * for accents. Bamboo's base values are carried over unchanged from the
  * project's original prefers-color-scheme dark palette.
  */
 :root {
-	--color-bg: #af957e;
+	--color-bg: #a18974;
 	--color-surface: #f6efe4;
 	--color-surface-alt: #ecdfc9;
 	--color-border: #cbb79c;
@@ -17,7 +17,7 @@
 	--color-ink: #1a1a18;
 	--color-on-ink: #f6efe4;
 	--color-text: var(--color-ink);
-	--color-text-muted: color-mix(in srgb, #1a1a18 60%, #af957e 40%);
+	--color-text-muted: color-mix(in srgb, #1a1a18 60%, var(--color-bg) 40%);
 
 	--color-accent: #457730;
 	--color-accent-strong: #18340c;

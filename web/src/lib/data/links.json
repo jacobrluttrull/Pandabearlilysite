@@ -1,4 +1,5 @@
 [
+	{ "label": "Discord", "abbr": "DC", "url": "#" },
 	{ "label": "Twitch", "abbr": "TW", "url": "#" },
 	{ "label": "YouTube", "abbr": "YT", "url": "#" },
 	{ "label": "Twitter / X", "abbr": "X", "url": "#" },
