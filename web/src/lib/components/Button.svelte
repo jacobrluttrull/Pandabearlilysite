@@ -94,14 +94,22 @@
 		border-color: var(--color-accent);
 	}
 
+	/* cream: a quiet accent-tinted fill on hover, echoing the link-list
+	   hover tint elsewhere in the theme */
+	.btn.secondary:hover:not(:disabled) {
+		background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+	}
+
 	/* bamboo divergence: primary fills with accent instead of ink,
-	   secondary gains a spirit-glow hover treatment */
+	   secondary keeps its original spirit-glow hover treatment (no
+	   background fill, to avoid stacking a second accent cue) */
 	:global([data-theme='bamboo']) .btn.primary {
 		background: var(--color-accent);
 		color: var(--color-on-ink);
 	}
 
 	:global([data-theme='bamboo']) .btn.secondary:hover:not(:disabled) {
+		background: transparent;
 		border-color: var(--color-accent);
 		box-shadow: 0 0 1.25rem color-mix(in srgb, var(--color-accent) 55%, transparent);
 	}

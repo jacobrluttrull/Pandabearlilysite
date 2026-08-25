@@ -4,14 +4,23 @@
 
 	type CardProps = {
 		variant?: 'default' | 'flat';
+		/** Adds the "Accent Rail" treatment — a 3px forest-green top edge for
+		 *  featured/prominent cards (cream only; bamboo keeps its normal border). */
+		rail?: boolean;
 		class?: string;
 		children: Snippet;
 	} & HTMLAttributes<HTMLDivElement>;
 
-	let { variant = 'default', class: className = '', children, ...rest }: CardProps = $props();
+	let {
+		variant = 'default',
+		rail = false,
+		class: className = '',
+		children,
+		...rest
+	}: CardProps = $props();
 </script>
 
-<div class="card {variant} {className}" {...rest}>
+<div class="card {variant} {className}" class:rail {...rest}>
 	{@render children()}
 </div>
 
@@ -31,5 +40,17 @@
 		background: var(--color-surface);
 		backdrop-filter: none;
 		-webkit-backdrop-filter: none;
+	}
+
+	/* Accent Rail (cream): a 3px forest-green top edge for featured cards —
+	   "a pop of color without overwhelming the beige palette" per the design
+	   doc. Bamboo already reads as accent-forward via its glass treatment, so
+	   it keeps the normal 1px border instead of gaining a second green cue. */
+	.card.rail {
+		border-top: 3px solid var(--color-accent);
+	}
+
+	:global([data-theme='bamboo']) .card.rail {
+		border-top: 1px solid var(--surface-glass-border);
 	}
 </style>

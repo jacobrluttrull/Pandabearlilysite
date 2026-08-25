@@ -1,8 +1,44 @@
 [
-	{ "name": "meuwzza", "role": "Commissioned Art", "url": "" },
-	{ "name": "mumumo6", "role": "Commissioned Art", "url": "" },
-	{ "name": "ぐるみん.Mini", "role": "Commissioned Art", "url": "" },
-	{ "name": "StarberryVi", "role": "Commissioned Art", "url": "" },
-	{ "name": "Umino", "role": "Commissioned Art", "url": "" },
-	{ "name": "∅", "role": "Commissioned Art", "url": "" }
+	{
+		"id": "meuwzza",
+		"title": "meuwzza",
+		"caption": "Commissioned Art",
+		"image": "/images/art/meuwzza.png",
+		"url": ""
+	},
+	{
+		"id": "mumumo6",
+		"title": "mumumo6",
+		"caption": "Commissioned Art",
+		"image": "/images/art/mumumo6.png",
+		"url": ""
+	},
+	{
+		"id": "gurumin-mini",
+		"title": "ぐるみん.Mini",
+		"caption": "Commissioned Art",
+		"image": "/images/art/gurumin-mini.png",
+		"url": ""
+	},
+	{
+		"id": "starberryvi",
+		"title": "StarberryVi",
+		"caption": "Commissioned Art",
+		"image": "/images/art/starberryvi.png",
+		"url": ""
+	},
+	{
+		"id": "umino",
+		"title": "Umino",
+		"caption": "Commissioned Art",
+		"image": "/images/art/umino.png",
+		"url": ""
+	},
+	{
+		"id": "empty-set",
+		"title": "∅",
+		"caption": "Commissioned Art",
+		"image": "/images/art/empty-set.png",
+		"url": ""
+	}
 ]

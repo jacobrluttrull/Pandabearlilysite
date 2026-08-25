@@ -16,7 +16,7 @@
 
 	<div class="category-grid">
 		{#each credits as { category, entries } (category)}
-			<Card class="category-card">
+			<Card class="category-card" rail>
 				<h2>{category}</h2>
 				<ul class="entry-list">
 					{#each entries as { role, name, url } (role)}

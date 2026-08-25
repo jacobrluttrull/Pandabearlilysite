@@ -146,6 +146,11 @@
 	}
 
 	.link-list a:hover {
+		background: color-mix(in srgb, var(--color-accent) 10%, var(--color-surface-alt) 90%);
+	}
+
+	/* bamboo: keep the plain alt-surface hover it already had */
+	:global([data-theme='bamboo']) .link-list a:hover {
 		background: var(--color-surface-alt);
 	}
 
@@ -154,13 +159,19 @@
 		width: 2.25rem;
 		height: 2.25rem;
 		border-radius: 50%;
-		background: var(--color-surface-alt);
+		background: color-mix(in srgb, var(--color-accent) 18%, var(--color-surface-alt) 82%);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-family: var(--font-body);
 		font-weight: 700;
 		font-size: 0.7rem;
+		color: var(--color-accent-strong);
+	}
+
+	/* bamboo: keep the muted flat badge it already had */
+	:global([data-theme='bamboo']) .icon {
+		background: var(--color-surface-alt);
 		color: var(--color-text-muted);
 	}
 

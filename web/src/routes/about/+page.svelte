@@ -19,7 +19,7 @@
 	</header>
 
 	<div class="bento">
-		<Card class="profile-card">
+		<Card class="profile-card" rail>
 			<div class="profile-head">
 				<div class="avatar" aria-hidden="true">PL</div>
 				<div>
@@ -145,7 +145,7 @@
 		width: 4rem;
 		height: 4rem;
 		border-radius: 50%;
-		background: var(--color-surface-alt);
+		background: color-mix(in srgb, var(--color-accent) 18%, var(--color-surface-alt) 82%);
 		color: var(--color-accent-strong);
 		border: 1px solid var(--color-border);
 		display: flex;
@@ -154,6 +154,12 @@
 		font-family: var(--font-heading);
 		font-weight: 700;
 		font-size: 1.5rem;
+	}
+
+	/* bamboo: keep the flat badge fill it already had — the green text is
+	   unchanged, only cream gains the tinted background */
+	:global([data-theme='bamboo']) .avatar {
+		background: var(--color-surface-alt);
 	}
 
 	h2 {

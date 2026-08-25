@@ -41,3 +41,7 @@ soundboard-api/data/
 
 go.work
 go.work.sum
+
+# Playwright MCP scratch output (screenshots/snapshots taken during review)
+/.review
+/.playwright-mcp
