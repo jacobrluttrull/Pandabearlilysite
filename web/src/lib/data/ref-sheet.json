@@ -1,0 +1,38 @@
+[
+	{
+		"id": "full-body",
+		"title": "Full Body",
+		"caption": "Front-facing full body reference with base proportions.",
+		"image": "/images/refs/full-body.png"
+	},
+	{
+		"id": "turnaround",
+		"title": "Turnaround",
+		"caption": "Front, side, and back views for consistent modeling.",
+		"image": "/images/refs/turnaround.png"
+	},
+	{
+		"id": "expression-sheet",
+		"title": "Expression Sheet",
+		"caption": "Core facial expressions used for emotes and reactions.",
+		"image": "/images/refs/expression-sheet.png"
+	},
+	{
+		"id": "color-palette",
+		"title": "Color Palette",
+		"caption": "Official hex values for hair, outfit, and accent colors.",
+		"image": "/images/refs/color-palette.png"
+	},
+	{
+		"id": "outfit-variants",
+		"title": "Outfit Variants",
+		"caption": "Alternate and seasonal outfit designs.",
+		"image": "/images/refs/outfit-variants.png"
+	},
+	{
+		"id": "closeup-details",
+		"title": "Close-Up Details",
+		"caption": "Accessories, markings, and texture close-ups.",
+		"image": ""
+	}
+]

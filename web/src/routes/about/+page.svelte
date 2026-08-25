@@ -1,229 +1,294 @@
 <script lang="ts">
-	import links from '$lib/data/links.json';
+	import Card from '$lib/components/Card.svelte';
+	import Chip from '$lib/components/Chip.svelte';
+	import about from '$lib/data/about.json';
 </script>
 
 <svelte:head>
-	<title>PandaLily — Links</title>
+	<title>PandaLily — About</title>
 </svelte:head>
 
-<section class="links-page">
-	<aside class="profile">
-		<div class="avatar" aria-hidden="true">PL</div>
-		<h1>PandaLily</h1>
-		<p class="tagline">Spirit guardian of the bamboo forest</p>
-	</aside>
+<section class="about-page">
+	<header class="page-header">
+		<h1>About</h1>
+		<p class="lede">
+			A little lore about the spirit guardian of the bamboo forest — species, duty, likes, and
+			dislikes.
+		</p>
+		<p class="editor-note">Placeholder bio below — real text coming soon.</p>
+	</header>
 
-	<div class="directory">
-		<a class="featured" href="/soundboard">
-			<div class="featured-icon" aria-hidden="true">♪</div>
-			<div class="featured-body">
-				<span class="eyebrow">Featured</span>
-				<h2>Official Soundboard</h2>
-				<p>Clips, alerts, and sounds from the bamboo forest.</p>
+	<div class="bento">
+		<Card class="profile-card">
+			<div class="profile-head">
+				<div class="avatar" aria-hidden="true">PL</div>
+				<div>
+					<h2>{about.name}</h2>
+					<p class="role">{about.role}</p>
+				</div>
 			</div>
-			<span class="chevron" aria-hidden="true">→</span>
-		</a>
 
-		<ul class="link-list">
-			{#each links as link}
-				<li>
-					<a href={link.url} target="_blank" rel="noreferrer">
-						<span class="icon" aria-hidden="true">{link.abbr}</span>
-						<span class="label">{link.label}</span>
-						<span class="chevron" aria-hidden="true">↗</span>
-					</a>
-				</li>
-			{/each}
-		</ul>
+			<div class="tags">
+				{#each about.tags as tag (tag)}
+					<Chip>{tag}</Chip>
+				{/each}
+			</div>
+
+			<p class="bio">{about.bio}</p>
+
+			<div class="duty">
+				<h3>Duty</h3>
+				<p>{about.duty}</p>
+			</div>
+		</Card>
+
+		<Card class="vitals-card">
+			<h3>Vitals</h3>
+			<ul class="vitals-list">
+				{#each about.vitals as vital (vital.label)}
+					<li>
+						<span class="vital-label">{vital.label}</span>
+						<span class="vital-value">{vital.value}</span>
+					</li>
+				{/each}
+			</ul>
+		</Card>
+
+		<Card class="preferences-card">
+			<h3>Affinities &amp; Aversions</h3>
+			<div class="preferences">
+				<div>
+					<h4>Affinities</h4>
+					<ul class="pref-list affinities">
+						{#each about.affinities as item (item)}
+							<li>{item}</li>
+						{/each}
+					</ul>
+				</div>
+				<div>
+					<h4>Aversions</h4>
+					<ul class="pref-list aversions">
+						{#each about.aversions as item (item)}
+							<li>{item}</li>
+						{/each}
+					</ul>
+				</div>
+			</div>
+		</Card>
 	</div>
 </section>
 
 <style>
-	.links-page {
+	.about-page {
 		max-width: 1000px;
 		margin: 0 auto;
-		padding: 3rem 1.5rem 4rem;
-		display: grid;
-		grid-template-columns: 1fr;
-		gap: 2.5rem;
+		padding: var(--space-6) var(--space-3) var(--space-6);
 	}
 
-	.profile {
+	.page-header {
 		display: flex;
 		flex-direction: column;
-		align-items: center;
+		gap: var(--space-1);
 		text-align: center;
-		gap: 0.5rem;
+		margin-bottom: var(--space-4);
+	}
+
+	h1 {
+		font: var(--text-headline-lg-mobile);
+		color: var(--color-ink);
+		margin: 0;
+	}
+
+	.lede {
+		font: var(--text-body-lg);
+		color: var(--color-text-muted);
+		max-width: 640px;
+		margin: 0 auto;
+	}
+
+	.editor-note {
+		font: var(--text-label-sm);
+		font-style: italic;
+		color: var(--color-text-muted);
+		opacity: 0.8;
+		margin: 0;
+	}
+
+	.bento {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-3);
+	}
+
+	:global(.profile-card) {
+		grid-column: 1 / -1;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-3);
+	}
+
+	:global(.vitals-card),
+	:global(.preferences-card) {
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-2);
+	}
+
+	.profile-head {
+		display: flex;
+		align-items: center;
+		gap: var(--space-2);
 	}
 
 	.avatar {
-		width: 7rem;
-		height: 7rem;
+		flex-shrink: 0;
+		width: 4rem;
+		height: 4rem;
 		border-radius: 50%;
 		background: var(--color-surface-alt);
 		color: var(--color-accent-strong);
+		border: 1px solid var(--color-border);
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		font-family: var(--font-heading);
-		font-size: 2rem;
 		font-weight: 700;
-		border: 1px solid var(--color-border);
-		margin-bottom: 0.5rem;
+		font-size: 1.5rem;
 	}
 
-	h1 {
-		font-size: 2rem;
+	h2 {
+		font: var(--text-headline-md);
+		color: var(--color-ink);
 		margin: 0;
 	}
 
-	.tagline {
+	.role {
+		font: var(--text-label);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-accent-strong);
 		margin: 0;
-		color: var(--color-text-muted);
 	}
 
-	.directory {
+	.tags {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-1);
+	}
+
+	.bio {
+		font: var(--text-body-md);
+		color: var(--color-text);
+		margin: 0;
+	}
+
+	.duty {
 		display: flex;
 		flex-direction: column;
-		gap: 1.5rem;
-	}
-
-	.featured {
-		position: relative;
-		display: flex;
-		align-items: center;
-		gap: 1.25rem;
-		padding: 1.5rem;
-		background: var(--color-surface);
-		border: 2px solid var(--color-accent);
-		border-radius: var(--radius-lg);
-		text-decoration: none;
-		color: var(--color-text);
-		overflow: hidden;
-		transition: background-color 0.2s;
-	}
-
-	.featured::before {
-		content: '';
-		position: absolute;
-		top: 0;
-		left: 0;
-		right: 0;
-		height: 4px;
-		background: var(--color-accent);
-	}
-
-	.featured:hover {
-		background: var(--color-surface-alt);
-	}
-
-	.featured-icon {
-		flex-shrink: 0;
-		width: 3rem;
-		height: 3rem;
-		border-radius: 50%;
-		background: var(--color-surface-alt);
-		color: var(--color-accent-strong);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 1.25rem;
-	}
-
-	.featured-body {
-		flex: 1;
-	}
-
-	.eyebrow {
-		display: inline-block;
-		font-family: var(--font-body);
-		font-size: 0.7rem;
-		font-weight: 700;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-		color: var(--color-accent-strong);
-		background: var(--color-surface-alt);
-		padding: 0.15rem 0.5rem;
-		border-radius: var(--radius-sm);
-		margin-bottom: 0.5rem;
-	}
-
-	.featured h2 {
-		font-size: 1.25rem;
-		margin: 0 0 0.25rem;
-	}
-
-	.featured p {
-		margin: 0;
-		color: var(--color-text-muted);
-		font-size: 0.9rem;
-	}
-
-	.chevron {
-		color: var(--color-text-muted);
-		font-size: 1.1rem;
-	}
-
-	.link-list {
-		list-style: none;
-		margin: 0;
-		padding: 0;
-		background: var(--color-surface);
-		border: 1px solid var(--color-border);
-		border-radius: var(--radius-lg);
-		overflow: hidden;
-	}
-
-	.link-list li + li {
+		gap: 0.35rem;
+		padding-top: var(--space-2);
 		border-top: 1px solid var(--color-border);
 	}
 
-	.link-list a {
-		display: flex;
-		align-items: center;
-		gap: 1rem;
-		padding: 1.1rem 1.25rem;
-		text-decoration: none;
+	.bento h3 {
+		font: var(--text-label);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
+		margin: 0;
+	}
+
+	.bento h4 {
+		font: var(--text-label-sm);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
+		margin: 0 0 var(--space-1);
+	}
+
+	.duty p {
+		font: var(--text-body-md);
 		color: var(--color-text);
-		transition: background-color 0.2s;
+		margin: 0;
 	}
 
-	.link-list a:hover {
-		background: var(--color-surface-alt);
+	.vitals-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
 	}
 
-	.icon {
-		flex-shrink: 0;
-		width: 2.25rem;
-		height: 2.25rem;
-		border-radius: 50%;
-		background: var(--color-surface-alt);
+	.vitals-list li {
 		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-family: var(--font-body);
-		font-weight: 700;
-		font-size: 0.7rem;
+		justify-content: space-between;
+		align-items: baseline;
+		gap: var(--space-2);
+		padding: 0.6rem 0;
+		border-bottom: 1px solid var(--color-border);
+	}
+
+	.vitals-list li:last-child {
+		border-bottom: none;
+	}
+
+	.vital-label {
+		font: var(--text-body-md);
 		color: var(--color-text-muted);
 	}
 
-	.label {
-		flex: 1;
-		font-family: var(--font-body);
-		font-weight: 600;
+	.vital-value {
+		font: var(--text-label);
+		color: var(--color-ink);
+		text-align: right;
+	}
+
+	.preferences {
+		display: grid;
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+		gap: var(--space-2);
+	}
+
+	.pref-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 0.4rem;
+	}
+
+	.pref-list li {
+		position: relative;
+		padding-left: 1rem;
+		font: var(--text-body-md);
+		color: var(--color-text);
+	}
+
+	.pref-list li::before {
+		content: '';
+		position: absolute;
+		left: 0;
+		top: 0.55em;
+		width: 0.4rem;
+		height: 0.4rem;
+		border-radius: 50%;
+	}
+
+	.affinities li::before {
+		background: var(--color-accent);
+	}
+
+	.aversions li::before {
+		background: var(--color-text-muted);
 	}
 
 	@media (min-width: 768px) {
-		.links-page {
-			grid-template-columns: 260px 1fr;
-			align-items: start;
+		h1 {
+			font: var(--text-headline-lg);
 		}
 
-		.profile {
-			position: sticky;
-			top: 6rem;
-			align-items: flex-start;
-			text-align: left;
+		.bento {
+			grid-template-columns: 1fr 1fr;
 		}
 	}
 </style>

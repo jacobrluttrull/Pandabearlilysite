@@ -1,0 +1,31 @@
+[
+	{
+		"category": "Live2D Model",
+		"entries": [
+			{ "role": "Art", "name": "TBD", "url": "" },
+			{ "role": "Rigging", "name": "TBD", "url": "" }
+		]
+	},
+	{
+		"category": "Stream Assets & Screens",
+		"entries": [
+			{ "role": "Logo", "name": "TBD", "url": "" },
+			{ "role": "Starting Screen", "name": "TBD", "url": "" },
+			{ "role": "Background", "name": "TBD", "url": "" },
+			{ "role": "Ending Screen", "name": "TBD", "url": "" }
+		]
+	},
+	{
+		"category": "Emotes",
+		"entries": [
+			{ "role": "Emote Set", "name": "TBD", "url": "" }
+		]
+	},
+	{
+		"category": "Music",
+		"entries": [
+			{ "role": "Intro Theme", "name": "TBD", "url": "" },
+			{ "role": "Outro Theme", "name": "TBD", "url": "" }
+		]
+	}
+]

@@ -1,0 +1,14 @@
+{
+	"name": "PandaLily",
+	"role": "Spirit Guardian",
+	"tags": ["Half-panda", "Half-girl", "Bamboo Spirit"],
+	"bio": "Half girl, half red panda, and full-time caretaker of the Zenith Bamboo grove. PandaLily drifted out of the forest one day, decided streaming was more fun than hibernating, and never really left.",
+	"duty": "Keeping the bamboo forest calm and green, looking after the spirits (and viewers) who wander through it, and making sure nobody leaves without a snack.",
+	"vitals": [
+		{ "label": "Species", "value": "Red panda spirit" },
+		{ "label": "Role", "value": "Spirit Guardian" },
+		{ "label": "Home", "value": "Zenith Bamboo Grove" }
+	],
+	"affinities": ["Bamboo shoots", "Naps in sunbeams", "Chat being silly"],
+	"aversions": ["Empty snack bowls", "Loud thunderstorms", "Being called a raccoon"]
+}

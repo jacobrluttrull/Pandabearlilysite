@@ -1,8 +1,12 @@
 /*
- * Zenith Cream: beige is the dominant surface, forest green is a sparing
- * accent (not the base). Base color is #af957e (your call); everything
- * else here is a lighten/darken of that plus ink-black and the ref-sheet
- * greens (#18340C deep, #457730 mid, #588C4E sage) used only for accents.
+ * Two themes, selected via [data-theme] on the root element (see
+ * PandaLily Design Pattern in CLAUDE.md): "cream" (default, light,
+ * flat/papery — Zenith Cream) and "bamboo" (dark, glassmorphic — Zenith
+ * Bamboo). Cream's base color is #af957e (your call); everything else
+ * in that theme is a lighten/darken of that plus ink-black and the
+ * ref-sheet greens (#18340C deep, #457730 mid, #588C4E sage) used only
+ * for accents. Bamboo's base values are carried over unchanged from the
+ * project's original prefers-color-scheme dark palette.
  */
 :root {
 	--color-bg: #af957e;
@@ -18,28 +22,50 @@
 	--color-accent: #457730;
 	--color-accent-strong: #18340c;
 
+	/* surface treatment: cream is flat/opaque, bamboo is glassmorphic */
+	--surface-blur: none;
+	--surface-glass-bg: var(--color-surface);
+	--surface-glass-border: var(--color-border);
+
 	--font-heading: 'Bricolage Grotesque', sans-serif;
 	--font-body: 'Plus Jakarta Sans', sans-serif;
+
+	--text-headline-lg: 800 2.5rem/1.15 var(--font-heading);
+	--text-headline-lg-mobile: 800 2rem/1.2 var(--font-heading);
+	--text-headline-md: 700 1.5rem/1.3 var(--font-heading);
+	--text-body-lg: 400 1.125rem/1.6 var(--font-body);
+	--text-body-md: 400 1rem/1.6 var(--font-body);
+	--text-label: 700 0.85rem/1.2 var(--font-body);
+	--text-label-sm: 600 0.75rem/1.2 var(--font-body);
 
 	--radius-sm: 0.25rem;
 	--radius: 0.5rem;
 	--radius-lg: 1rem;
 	--radius-xl: 1.5rem;
 	--radius-full: 9999px;
+
+	--space-1: 0.5rem;
+	--space-2: 1rem;
+	--space-3: 1.5rem;
+	--space-4: 2rem;
+	--space-6: 3rem;
+	--container-max: 1200px;
 }
 
-@media (prefers-color-scheme: dark) {
-	:root {
-		--color-bg: #1a1613;
-		--color-surface: #26211c;
-		--color-surface-alt: #352d26;
-		--color-border: #463c32;
+:root[data-theme='bamboo'] {
+	--color-bg: #1a1613;
+	--color-surface: #26211c;
+	--color-surface-alt: #352d26;
+	--color-border: #463c32;
 
-		--color-ink: #f2e6d0;
-		--color-on-ink: #1a1613;
-		--color-text-muted: color-mix(in srgb, #f2e6d0 60%, #1a1613 40%);
+	--color-ink: #f2e6d0;
+	--color-on-ink: #1a1613;
+	--color-text-muted: color-mix(in srgb, #f2e6d0 60%, #1a1613 40%);
 
-		--color-accent: #588c4e;
-		--color-accent-strong: #457730;
-	}
+	--color-accent: #588c4e;
+	--color-accent-strong: #457730;
+
+	--surface-blur: blur(20px);
+	--surface-glass-bg: color-mix(in srgb, var(--color-surface) 60%, transparent);
+	--surface-glass-border: color-mix(in srgb, var(--color-ink) 12%, transparent);
 }

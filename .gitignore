@@ -38,3 +38,6 @@ soundboard-api/data/
 
 #Designs
 /designs
+
+go.work
+go.work.sum
