@@ -2,25 +2,68 @@
  * Two themes, selected via [data-theme] on the root element (see
  * PandaLily Design Pattern in CLAUDE.md): "bamboo" (default, dark,
  * glassmorphic — Zenith Bamboo) and "cream" (light, flat/papery — Zenith
- * Cream). Cream's base color is #a18974 (your call); everything else
- * in that theme is a lighten/darken of that plus ink-black and the
- * ref-sheet greens (#18340C deep, #457730 mid, #588C4E sage) used only
- * for accents. Bamboo's base values are carried over unchanged from the
- * project's original prefers-color-scheme dark palette.
+ * Cream).
+ *
+ * REVISION NOTE (v3): v2 made green the *structural* color — a fully
+ * saturated forest green (#457730) drawn as the --color-border on every
+ * card, chip, nav underline, and grid line across the whole site. In
+ * small doses that's a confident accent; tiled across dozens of edges on
+ * one screen it reads as "the page is green," which is what the owner
+ * flagged as overpowering. v3 keeps the same two-color identity — a
+ * warm beige family (dominant, structural) plus one green (accent,
+ * used sparingly and desaturated where it appears structurally) — but
+ * rebalances which one carries the most visual weight:
+ *
+ *   - --color-border/--color-accent-strong-ish structural uses now pull
+ *     from a single desaturated "moss" green (#6a8556) instead of the
+ *     vivid #457730. It's still unmistakably green, just quiet enough
+ *     not to fight the beige for attention when repeated everywhere.
+ *   - --color-accent (actual links/icons/focus rings/active nav — small,
+ *     isolated uses, not tiled) keeps a punchier, more saturated green
+ *     so those elements still pop against the beige field.
+ *   - Cream's --color-surface backs off from the fairly saturated peach
+ *     (#F4D4BD) toward a calmer warm oat/beige — still clearly "beige,"
+ *     not parchment-white, but no longer competing in saturation with
+ *     the green border sitting on top of it.
+ *   - Bamboo's --color-bg backs off from a fully saturated dark green
+ *     (#15230d) to a muted green-charcoal — dark and still identifiably
+ *     forest-toned, but not a wall of hue. --color-surface settles
+ *     between v1 (too flat/murky against bg) and v2 (too bright/warm)
+ *     at a muted warm brown.
+ *
+ * The two colors are meant to mesh as a pair in both themes: moss green
+ * (#6a8556) is shared verbatim as --color-border across cream and
+ * bamboo, so it's the one consistent thread tying the themes together;
+ * everything else (bg/surface/ink) is theme-local.
+ *
+ * --color-canopy / --color-panda-rust (dappled sunlight gold, her
+ * rust-red fur tone) are separate secondary accents outside this
+ * palette's scope and are left unchanged.
+ *
+ * --color-text-muted and every text/bg, text/surface, and border/bg,
+ * border/surface pair above were checked against WCAG contrast math
+ * (text ≥4.5:1, decorative border ≥~3:1 where practical) before landing
+ * here — see the palette discussion for the numbers.
+ *
+ * REVISION NOTE (v4): owner call after seeing v3 rendered — dark green
+ * (bamboo --color-bg) was a touch too dark, cream --color-bg and
+ * --color-surface were a touch too bright. Small +/-4 lightness nudges
+ * in HSL space, re-verified against WCAG minimums; hue/saturation and
+ * every other token unchanged from v3.
  */
 :root {
-	--color-bg: #a18974;
-	--color-surface: #f6efe4;
-	--color-surface-alt: #ecdfc9;
-	--color-border: #cbb79c;
+	--color-bg: #f0e7d1;
+	--color-surface: #e5d0ac;
+	--color-surface-alt: #d8be91;
+	--color-border: #6a8556;
 
-	--color-ink: #1a1a18;
-	--color-on-ink: #f6efe4;
+	--color-ink: #1c2a14;
+	--color-on-ink: #fbf1e6;
 	--color-text: var(--color-ink);
-	--color-text-muted: color-mix(in srgb, #1a1a18 60%, var(--color-bg) 40%);
+	--color-text-muted: #4a5a3f;
 
-	--color-accent: #457730;
-	--color-accent-strong: #18340c;
+	--color-accent: #3a6330;
+	--color-accent-strong: #2a4c1e;
 
 	/* secondary accents: dappled sunlight through the canopy, and the rust-red
 	   of PandaLily's own coloring — used sparingly, never as the dominant hue */
@@ -67,17 +110,17 @@
 }
 
 :root[data-theme='bamboo'] {
-	--color-bg: #1a1613;
-	--color-surface: #26211c;
-	--color-surface-alt: #352d26;
-	--color-border: #463c32;
+	--color-bg: #232c1b;
+	--color-surface: #463a28;
+	--color-surface-alt: #55452f;
+	--color-border: #6a8556;
 
-	--color-ink: #f2e6d0;
-	--color-on-ink: #1a1613;
-	--color-text-muted: color-mix(in srgb, #f2e6d0 60%, #1a1613 40%);
+	--color-ink: #f0dec7;
+	--color-on-ink: #14190d;
+	--color-text-muted: #cdbe9e;
 
-	--color-accent: #588c4e;
-	--color-accent-strong: #457730;
+	--color-accent: #8ab873;
+	--color-accent-strong: #6a9c5c;
 
 	--color-canopy: #d9a441;
 	--color-canopy-strong: #f0c878;
