@@ -17,19 +17,23 @@ Deployment target is tentatively Cloudflare Pages (`adapter-cloudflare`) for the
 
 - Home / Links
 - About
+- Art (commissioned artwork gallery)
 - Ref Sheet (image gallery)
 - Credits
 - Soundboard (grid of clickable clips, backed by the Go API)
+
+## Design system
+
+Two themes — "bamboo" (dark, glassmorphic, default) and "cream" (light, flat) — selected via `data-theme` on `<html>` and stored as a user preference. Every color, spacing, radius, and font value is a CSS custom property in `web/src/lib/styles/tokens.css`; components (`Button`, `Card`, `Chip`, `Nav`, `Gallery`, etc.) reference tokens only, never hardcoded values. See the "PandaLily Design Pattern" section in `CLAUDE.md` for the full pattern.
 
 ## Status
 
 In progress.
 
-- `web/`: SvelteKit skeleton scaffolded and running (`npm run dev`). No real pages/routes built yet.
-- `soundboard-api/`: Go module scaffolded (`cmd/api`, `cmd/cli`, `internal/soundbite`, `internal/db`, `internal/httpapi`, `internal/storage`). No real logic yet — SQLite schema and HTTP server are next.
+- `web/`: All six pages built and styled with the design system above. Static content (links, about text, art entries, credits, ref sheet entries) lives in `web/src/lib/data/*.json`, not hardcoded in components.
+- `soundboard-api/`: Go API (`cmd/api`) serving the soundbite list and audio files, SQLite (`modernc.org/sqlite`) with sqlc-generated queries and migrations, and a CLI (`cmd/cli`) for uploading and listing clips. The frontend soundboard page fetches from this API client-side (not at build time).
 
 ## Planned / undecided
 
-- Static content (links, about text, credits, ref sheet entries) will live in Markdown/JSON files, not hardcoded in components.
 - Soundbite schema still needs tags/category and source/stream context, deferred until there are more real clips to design against.
-- Final deployment targets for the frontend and backend, and audio file storage location.
+- Final deployment targets for the frontend and backend, and audio file storage location (on-disk next to the API vs. Cloudflare R2).
