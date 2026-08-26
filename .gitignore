@@ -39,6 +39,9 @@ soundboard-api/data/
 #Designs
 /designs
 
+# personal notes / drafts, not part of the site
+/info
+
 go.work
 go.work.sum
 
