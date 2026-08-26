@@ -5,6 +5,11 @@ Thumbs.db
 # IDE
 .idea/
 
+# Claude Code agents / skills (local tooling config, not site content)
+.agents/
+.claude/
+skills-lock.json
+
 # Node / SvelteKit (web/)
 node_modules/
 .svelte-kit/
