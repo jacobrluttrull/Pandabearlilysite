@@ -22,6 +22,12 @@
 	--color-accent: #457730;
 	--color-accent-strong: #18340c;
 
+	/* secondary accents: dappled sunlight through the canopy, and the rust-red
+	   of PandaLily's own coloring — used sparingly, never as the dominant hue */
+	--color-canopy: #e3a64a;
+	--color-canopy-strong: #c4832a;
+	--color-panda-rust: #b5502e;
+
 	/* surface treatment: cream is flat/opaque, bamboo is glassmorphic */
 	--surface-blur: none;
 	--surface-glass-bg: var(--color-surface);
@@ -29,14 +35,22 @@
 
 	--font-heading: 'Bricolage Grotesque', sans-serif;
 	--font-body: 'Plus Jakarta Sans', sans-serif;
+	/* system monospace stack — used only for the Ref Sheet's "technical
+	   document" numbering/labels, no webfont load needed */
+	--font-mono: ui-monospace, 'Cascadia Code', 'Consolas', 'Liberation Mono', monospace;
 
-	--text-headline-lg: 800 2.5rem/1.15 var(--font-heading);
-	--text-headline-lg-mobile: 800 2rem/1.2 var(--font-heading);
-	--text-headline-md: 700 1.5rem/1.3 var(--font-heading);
-	--text-body-lg: 400 1.125rem/1.6 var(--font-body);
-	--text-body-md: 400 1rem/1.6 var(--font-body);
-	--text-label: 700 0.85rem/1.2 var(--font-body);
-	--text-label-sm: 600 0.75rem/1.2 var(--font-body);
+	/* type scale and spacing run ~5% larger than the original values —
+	   everything below derives from these, so this is the one dial for
+	   "make the whole site bigger" */
+	--text-headline-lg: 800 2.625rem/1.15 var(--font-heading);
+	--text-headline-lg-mobile: 800 2.1rem/1.2 var(--font-heading);
+	--text-headline-md: 700 1.575rem/1.3 var(--font-heading);
+	--text-body-lg: 400 1.18rem/1.6 var(--font-body);
+	--text-body-md: 400 1.05rem/1.6 var(--font-body);
+	--text-label: 700 0.89rem/1.2 var(--font-body);
+	--text-label-sm: 600 0.79rem/1.2 var(--font-body);
+	--text-mono-sm: 700 0.74rem/1.2 var(--font-mono);
+	--text-mono-md: 700 0.95rem/1.2 var(--font-mono);
 
 	--radius-sm: 0.25rem;
 	--radius: 0.5rem;
@@ -44,11 +58,11 @@
 	--radius-xl: 1.5rem;
 	--radius-full: 9999px;
 
-	--space-1: 0.5rem;
-	--space-2: 1rem;
-	--space-3: 1.5rem;
-	--space-4: 2rem;
-	--space-6: 3rem;
+	--space-1: 0.525rem;
+	--space-2: 1.05rem;
+	--space-3: 1.575rem;
+	--space-4: 2.1rem;
+	--space-6: 3.15rem;
 	--container-max: 1200px;
 }
 
@@ -64,6 +78,10 @@
 
 	--color-accent: #588c4e;
 	--color-accent-strong: #457730;
+
+	--color-canopy: #d9a441;
+	--color-canopy-strong: #f0c878;
+	--color-panda-rust: #c96a42;
 
 	--surface-blur: blur(20px);
 	--surface-glass-bg: color-mix(in srgb, var(--color-surface) 60%, transparent);

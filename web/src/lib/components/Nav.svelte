@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
+	import PawPrint from './PawPrint.svelte';
 
 	const tabs = [
 		{ label: 'About', href: '/about' },
@@ -31,8 +32,12 @@
 		<nav aria-label="Main">
 			<ul>
 				{#each tabs as tab (tab.href)}
+					{@const isActive = page.url.pathname === tab.href}
 					<li>
-						<a href={tab.href} class:active={page.url.pathname === tab.href}>{tab.label}</a>
+						<a href={tab.href} class:active={isActive}>
+							{tab.label}
+							<PawPrint size={9} class="active-paw" aria-hidden="true" />
+						</a>
 					</li>
 				{/each}
 			</ul>
@@ -79,18 +84,24 @@
 		border-bottom: 1px solid var(--color-border);
 	}
 
+	/* grid, not flex space-between: with a wide wordmark and a narrow toggle
+	   button, space-between visually skews the centered tab list off to one
+	   side. A 1fr/auto/1fr grid keeps the tabs genuinely centered regardless
+	   of how the two side elements compare in width. */
 	.nav-inner {
 		max-width: 1200px;
 		margin: 0 auto;
-		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		row-gap: 0.5rem;
 		padding: 1rem 1.5rem;
+		display: grid;
+		grid-template-columns: 1fr auto 1fr;
+		grid-template-areas: 'brand nav toggle';
+		align-items: center;
+		column-gap: 1rem;
 	}
 
 	.wordmark {
+		grid-area: brand;
+		justify-self: start;
 		font-family: var(--font-heading);
 		font-weight: 700;
 		font-size: 1.5rem;
@@ -98,8 +109,16 @@
 		text-decoration: none;
 	}
 
+	nav {
+		grid-area: nav;
+		justify-self: center;
+		min-width: 0;
+	}
+
 	nav ul {
 		display: flex;
+		flex-wrap: wrap;
+		justify-content: center;
 		gap: 1.5rem;
 		list-style: none;
 		margin: 0;
@@ -107,13 +126,15 @@
 	}
 
 	nav a {
+		position: relative;
+		display: inline-flex;
+		align-items: center;
 		text-decoration: none;
 		color: var(--color-text-muted);
 		font-family: var(--font-body);
 		font-weight: 600;
 		font-size: 0.9rem;
-		padding: 0.25rem 0;
-		border-bottom: 2px solid transparent;
+		padding: 0.25rem 0 0.6rem;
 		white-space: nowrap;
 		transition: color 0.2s;
 	}
@@ -124,10 +145,28 @@
 
 	nav a.active {
 		color: var(--color-accent);
-		border-bottom-color: var(--color-accent);
+	}
+
+	nav a :global(.active-paw) {
+		position: absolute;
+		bottom: 0;
+		left: 50%;
+		transform: translateX(-50%) scale(0.5);
+		color: var(--color-accent);
+		opacity: 0;
+		transition:
+			opacity 0.2s ease,
+			transform 0.2s ease;
+	}
+
+	nav a.active :global(.active-paw) {
+		opacity: 1;
+		transform: translateX(-50%) scale(1);
 	}
 
 	.theme-toggle {
+		grid-area: toggle;
+		justify-self: end;
 		display: flex;
 		align-items: center;
 		justify-content: center;
@@ -148,7 +187,23 @@
 		border-color: var(--color-accent);
 	}
 
-	@media (max-width: 640px) {
+	/* below this width the single-row grid gets too cramped (tabs start
+	   crowding the toggle button, then wrap raggedly). Reflow instead to a
+	   predictable two-row layout: brand + toggle stay paired on row one,
+	   the tab list gets its own full-width centered row below. */
+	@media (max-width: 700px) {
+		.nav-inner {
+			grid-template-columns: 1fr auto;
+			grid-template-areas:
+				'brand toggle'
+				'nav nav';
+			row-gap: 0.65rem;
+		}
+
+		nav {
+			justify-self: stretch;
+		}
+
 		nav ul {
 			gap: 0.85rem;
 		}

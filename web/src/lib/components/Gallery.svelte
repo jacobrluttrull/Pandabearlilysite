@@ -1,5 +1,8 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
+	import PawPrint from '$lib/components/PawPrint.svelte';
+	import BambooStalk from '$lib/components/BambooStalk.svelte';
+	import BambooSprout from '$lib/components/BambooSprout.svelte';
 
 	type GalleryEntry = {
 		id: string;
@@ -53,6 +56,9 @@
 	<header class="gallery-header">
 		<h1>{heading}</h1>
 		<p>{subtitle}</p>
+		<div class="grove-divider" aria-hidden="true">
+			<BambooStalk segments={2} leaf={false} class="grove-divider-stalk" />
+		</div>
 	</header>
 
 	<div class="gallery">
@@ -61,28 +67,21 @@
 				<button type="button" class="gallery-trigger" onclick={() => openEntry(entry)}>
 					<span class="frame">
 						{#if showsPlaceholder(entry)}
-							<span class="placeholder">
-								<svg
-									viewBox="0 0 24 24"
-									width="32"
-									height="32"
-									fill="none"
-									stroke="currentColor"
-									stroke-width="1.5"
-									aria-hidden="true"
-								>
-									<rect x="3" y="4" width="18" height="16" rx="2" />
-									<circle cx="8.5" cy="10" r="1.75" />
-									<path d="M21 16.5 15.5 11 5 20" />
-								</svg>
+							<span class="mat placeholder">
+								<BambooSprout size={40} class="placeholder-sprout" />
 								<span class="placeholder-label">Image coming soon</span>
 							</span>
 						{:else}
-							<img src={entry.image} alt={entry.title} onerror={() => markFailed(entry.id)} />
+							<span class="mat">
+								<img src={entry.image} alt={entry.title} onerror={() => markFailed(entry.id)} />
+							</span>
 						{/if}
 					</span>
 					<span class="entry-body">
-						<span class="entry-title">{entry.title}</span>
+						<span class="entry-plate">
+							<PawPrint size={11} class="entry-mark" />
+							<span class="entry-title">{entry.title}</span>
+						</span>
 						<span class="entry-caption">{entry.caption}</span>
 					</span>
 				</button>
@@ -98,28 +97,21 @@
 			<button type="button" class="lightbox-close" onclick={closeDialog} aria-label="Close">✕</button>
 			<span class="frame lightbox-frame">
 				{#if showsPlaceholder(entry)}
-					<span class="placeholder">
-						<svg
-							viewBox="0 0 24 24"
-							width="48"
-							height="48"
-							fill="none"
-							stroke="currentColor"
-							stroke-width="1.5"
-							aria-hidden="true"
-						>
-							<rect x="3" y="4" width="18" height="16" rx="2" />
-							<circle cx="8.5" cy="10" r="1.75" />
-							<path d="M21 16.5 15.5 11 5 20" />
-						</svg>
+					<span class="mat placeholder">
+						<BambooSprout size={64} grow class="placeholder-sprout" />
 						<span class="placeholder-label">Image coming soon</span>
 					</span>
 				{:else}
-					<img src={entry.image} alt={entry.title} onerror={() => markFailed(entry.id)} />
+					<span class="mat">
+						<img src={entry.image} alt={entry.title} onerror={() => markFailed(entry.id)} />
+					</span>
 				{/if}
 			</span>
 			<div class="lightbox-body">
-				<h2>{entry.title}</h2>
+				<span class="entry-plate">
+					<PawPrint size={12} class="entry-mark" />
+					<h2>{entry.title}</h2>
+				</span>
 				<p>{entry.caption}</p>
 				{#if entry.url}
 					<a class="lightbox-link" href={entry.url} target="_blank" rel="noreferrer">{linkLabel}</a>
@@ -138,7 +130,7 @@
 
 	.gallery-header {
 		max-width: 640px;
-		margin: 0 auto var(--space-4);
+		margin: 0 auto;
 		text-align: center;
 	}
 
@@ -151,6 +143,20 @@
 		margin: 0;
 		color: var(--color-text-muted);
 		font: var(--text-body-lg);
+	}
+
+	/* a fallen bamboo stalk laid under the header, standing in for a plain
+	   hairline rule — reused as-is wherever Gallery is mounted */
+	.grove-divider {
+		display: flex;
+		justify-content: center;
+		margin: var(--space-3) 0 var(--space-4);
+		color: var(--color-accent);
+		opacity: 0.75;
+	}
+
+	.grove-divider :global(.grove-divider-stalk) {
+		transform: rotate(90deg);
 	}
 
 	.gallery {
@@ -176,62 +182,145 @@
 
 	.gallery-trigger:focus-visible {
 		outline: 2px solid var(--color-accent);
-		outline-offset: -2px;
+		outline-offset: 2px;
 	}
 
+	/* the "frame": a wood-toned mount hung on the gallery wall, with a small
+	   nail head at the top edge — the mat sits inset inside it */
 	.frame {
+		position: relative;
 		display: block;
 		width: 100%;
 		aspect-ratio: 4 / 5;
-		background: var(--color-surface-alt);
-		border: 1px solid var(--color-border);
+		padding: 0.5rem;
 		border-radius: var(--radius);
-		overflow: hidden;
+		background: linear-gradient(
+			155deg,
+			color-mix(in srgb, var(--color-panda-rust) 32%, var(--color-surface-alt)) 0%,
+			var(--color-surface-alt) 65%
+		);
+		border: 1px solid var(--color-border);
+		transition:
+			transform 0.35s ease,
+			box-shadow 0.35s ease;
 	}
 
-	.frame img {
+	.frame::before {
+		content: '';
+		position: absolute;
+		top: -0.3rem;
+		left: 50%;
+		translate: -50% 0;
+		width: 0.4rem;
+		height: 0.4rem;
+		border-radius: var(--radius-full);
+		background: color-mix(in srgb, var(--color-ink) 55%, var(--color-panda-rust) 45%);
+		box-shadow: 0 1px 2px color-mix(in srgb, var(--color-ink) 35%, transparent);
+	}
+
+	.mat {
+		position: relative;
+		display: flex;
+		width: 100%;
+		height: 100%;
+		border-radius: calc(var(--radius) - 0.2rem);
+		overflow: hidden;
+		background: var(--color-surface);
+		border: 1px solid color-mix(in srgb, var(--color-ink) 10%, transparent);
+	}
+
+	.mat img {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
 		transition: transform 0.3s ease;
 	}
 
-	.gallery-trigger:hover .frame img {
+	.gallery-trigger:hover .mat img,
+	.gallery-trigger:focus-visible .mat img {
 		transform: scale(1.03);
 	}
 
+	.gallery-trigger:hover .frame,
+	.gallery-trigger:focus-visible .frame {
+		transform: translateY(-4px);
+		box-shadow:
+			0 12px 24px color-mix(in srgb, var(--color-ink) 22%, transparent),
+			0 0 0 1px color-mix(in srgb, var(--color-accent) 25%, transparent);
+	}
+
+	:global([data-theme='bamboo']) .gallery-trigger:hover .frame,
+	:global([data-theme='bamboo']) .gallery-trigger:focus-visible .frame {
+		box-shadow:
+			0 12px 24px color-mix(in srgb, var(--color-ink) 45%, transparent),
+			0 0 1.5rem color-mix(in srgb, var(--color-accent) 45%, transparent);
+	}
+
+	/* leaves react to the frame's hover/focus, not just their own — a small
+	   sign of life for the six placeholders sitting quietly in the grid */
+	:global(.gallery-trigger:hover .placeholder-sprout .sprout-leaf-a),
+	:global(.gallery-trigger:focus-visible .placeholder-sprout .sprout-leaf-a) {
+		transform: rotate(-6deg);
+	}
+
+	:global(.gallery-trigger:hover .placeholder-sprout .sprout-leaf-b),
+	:global(.gallery-trigger:focus-visible .placeholder-sprout .sprout-leaf-b) {
+		transform: rotate(6deg);
+	}
+
 	.placeholder {
-		display: flex;
-		height: 100%;
 		flex-direction: column;
 		align-items: center;
 		justify-content: center;
 		gap: var(--space-1);
+		padding: var(--space-2);
+		text-align: center;
 		color: var(--color-text-muted);
 	}
 
 	.placeholder-label {
 		font: var(--text-label-sm);
 		text-transform: uppercase;
-		letter-spacing: 0.06em;
+		letter-spacing: 0.08em;
+		color: var(--color-accent-strong);
+	}
+
+	:global([data-theme='bamboo']) .placeholder-label {
+		color: var(--color-canopy);
 	}
 
 	.entry-body {
 		display: flex;
 		flex-direction: column;
-		gap: 0.25rem;
+		align-items: center;
+		gap: 0.3rem;
 		padding-top: var(--space-2);
+		text-align: center;
+	}
+
+	.entry-plate {
+		display: flex;
+		align-items: center;
+		gap: 0.4rem;
+	}
+
+	.entry-plate :global(.entry-mark) {
+		color: var(--color-accent);
+		flex-shrink: 0;
 	}
 
 	.entry-title {
 		font-family: var(--font-heading);
 		font-weight: 700;
 		font-size: 1.05rem;
+		letter-spacing: 0.01em;
 		color: var(--color-text);
 	}
 
 	.entry-caption {
-		font: var(--text-body-md);
+		font: var(--text-label-sm);
+		text-transform: uppercase;
+		letter-spacing: 0.08em;
 		color: var(--color-text-muted);
 	}
 
@@ -284,19 +373,40 @@
 		display: flex;
 		align-items: center;
 		justify-content: center;
+		transition: background 0.2s ease;
+	}
+
+	.lightbox-close:hover {
+		background: color-mix(in srgb, var(--color-accent-strong) 65%, transparent);
 	}
 
 	.lightbox-frame {
-		aspect-ratio: 4 / 5;
+		padding: var(--space-2);
 		border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+		aspect-ratio: 4 / 5;
+	}
+
+	.lightbox-frame::before {
+		top: 0.05rem;
+		width: 0.55rem;
+		height: 0.55rem;
+	}
+
+	.lightbox-frame .mat {
+		border-radius: var(--radius);
 	}
 
 	.lightbox-body {
 		padding: var(--space-3);
 	}
 
-	.lightbox-body h2 {
+	.lightbox-body .entry-plate {
+		justify-content: flex-start;
 		margin-bottom: 0.35rem;
+	}
+
+	.lightbox-body h2 {
+		margin: 0;
 	}
 
 	.lightbox-body p {

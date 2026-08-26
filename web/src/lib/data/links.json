@@ -1,9 +1,9 @@
 [
-	{ "label": "Discord", "abbr": "DC", "url": "#" },
-	{ "label": "Twitch", "abbr": "TW", "url": "#" },
-	{ "label": "YouTube", "abbr": "YT", "url": "#" },
-	{ "label": "Twitter / X", "abbr": "X", "url": "#" },
-	{ "label": "TikTok", "abbr": "TT", "url": "#" },
-	{ "label": "Instagram", "abbr": "IG", "url": "#" },
-	{ "label": "Throne", "abbr": "TH", "url": "#" }
+	{ "label": "Discord", "abbr": "DC", "icon": "discord", "url": "#" },
+	{ "label": "Twitch", "abbr": "TW", "icon": "twitch", "url": "#" },
+	{ "label": "YouTube", "abbr": "YT", "icon": "youtube", "url": "#" },
+	{ "label": "Twitter / X", "abbr": "X", "icon": "twitter", "url": "#" },
+	{ "label": "TikTok", "abbr": "TT", "icon": "tiktok", "url": "#" },
+	{ "label": "Instagram", "abbr": "IG", "icon": "instagram", "url": "#" },
+	{ "label": "Throne", "abbr": "TH", "icon": "throne", "url": "#" }
 ]
