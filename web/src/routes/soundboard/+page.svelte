@@ -132,6 +132,10 @@
 		<div class="grid" class:collapsed>
 			{#each visible as clip (clip.id)}
 				{@const playing = nowPlayingId === clip.id}
+				<!-- the tile is a button, so the download link sits beside it in a
+				     wrapper rather than inside it — nesting an <a> in a <button> is
+				     invalid and breaks keyboard navigation -->
+				<div class="clip-cell">
 				<button
 					type="button"
 					class="clip-tile"
@@ -164,6 +168,25 @@
 						</span>
 					</span>
 				</button>
+					<a
+						class="clip-download"
+						href={`${baseUrl}${clip.download_url}`}
+						download
+						title={`Download "${clip.name}"`}
+					>
+						<svg viewBox="0 0 16 16" width="13" height="13" aria-hidden="true">
+							<path
+								d="M8 1.8v7.2m0 0L5.1 6.1M8 9L10.9 6.1M2.7 11.4v1.6a1.2 1.2 0 0 0 1.2 1.2h8.2a1.2 1.2 0 0 0 1.2-1.2v-1.6"
+								fill="none"
+								stroke="currentColor"
+								stroke-width="1.6"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						<span class="sr-only">Download {clip.name}</span>
+					</a>
+				</div>
 			{/each}
 		</div>
 
@@ -359,10 +382,18 @@
 		gap: var(--space-1);
 	}
 
+	/* holds the play tile and its download link as siblings, so the link can sit
+	   over the tile's corner without nesting interactive elements */
+	.clip-cell {
+		position: relative;
+		display: flex;
+	}
+
 	/* A tile rests quiet — soft fill, hairline edge — and only takes on the
 	   theme's full surface treatment when it's hovered, focused, or sounding.
 	   56 tiles at full weight is the wall; 56 tiles at rest is a field. */
 	.clip-tile {
+		flex: 1;
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
@@ -387,11 +418,52 @@
 	}
 
 	/* the name carries the tile — it wraps to as many lines as it needs
-	   rather than truncating mid-word */
+	   rather than truncating mid-word. The right inset keeps it clear of the
+	   download link sitting in the corner. */
 	.clip-name {
 		font-weight: 600;
 		line-height: 1.3;
 		overflow-wrap: break-word;
+		padding-right: var(--space-3);
+	}
+
+	/* Always visible rather than hover-only: on a touch screen there is no hover,
+	   and a save action nobody can find is not a feature. It stays muted so it
+	   reads as secondary to the tile's main job, which is playing. */
+	.clip-download {
+		position: absolute;
+		top: var(--space-1);
+		right: var(--space-1);
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.55rem;
+		height: 1.55rem;
+		border-radius: var(--radius-sm);
+		color: var(--color-text-muted);
+		opacity: 0.75;
+		transition:
+			color 0.2s ease,
+			background-color 0.2s ease,
+			opacity 0.2s ease;
+	}
+
+	.clip-download:hover,
+	.clip-download:focus-visible {
+		color: var(--color-accent);
+		background: var(--surface-quiet-bg);
+		opacity: 1;
+	}
+
+	.clip-download:focus-visible {
+		outline: 2px solid var(--color-accent);
+		outline-offset: 1px;
+	}
+
+	/* while a clip sounds, its download follows the tile into canopy gold */
+	.clip-cell:has(.clip-tile.playing) .clip-download {
+		color: var(--color-canopy-strong);
+		opacity: 1;
 	}
 
 	.clip-name :global(.playing-paw) {

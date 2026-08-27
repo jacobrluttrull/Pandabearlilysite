@@ -15,6 +15,7 @@ type soundbiteResponse struct {
 	DateStored    string  `json:"date_stored"`
 	LengthSeconds float64 `json:"length_seconds"`
 	AudioURL      string  `json:"audio_url"`
+	DownloadURL   string  `json:"download_url"`
 	PlayCount     int64   `json:"play_count"`
 }
 
@@ -25,6 +26,7 @@ func toSoundbiteResponse(s gen.Soundbite) soundbiteResponse {
 		DateStored:    s.DateStored,
 		LengthSeconds: s.LengthSeconds,
 		AudioURL:      fmt.Sprintf("/soundbites/%d/audio", s.ID),
+		DownloadURL:   fmt.Sprintf("/soundbites/%d/download", s.ID),
 		PlayCount:     s.PlayCount,
 	}
 	if s.DateMade.Valid {

@@ -10,6 +10,7 @@ const sampleSoundbites: Soundbite[] = [
 		date_stored: '2026-08-20T00:14:50.862Z',
 		length_seconds: 1.8,
 		audio_url: '/soundbites/1/audio',
+		download_url: '/soundbites/1/download',
 		play_count: 12
 	}
 ];

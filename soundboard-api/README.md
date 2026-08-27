@@ -123,7 +123,17 @@ go run .\cmd\api        # listens on :8080
 | `SOUNDBOARD_ADDR` | `:8080` | Listen address |
 | `SOUNDBOARD_ALLOWED_ORIGIN` | `*` | `Access-Control-Allow-Origin` |
 
-Endpoints: `GET /soundbites`, `GET /soundbites/{id}/audio` (supports range requests for
-seeking), `POST /soundbites/{id}/play`.
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /soundbites` | List every clip as JSON |
+| `GET /soundbites/{id}/audio` | Stream a clip for playback (supports range requests) |
+| `GET /soundbites/{id}/download` | Same bytes, sent as a file to save |
+| `POST /soundbites/{id}/play` | Record one play, returns the new total |
+
+`/download` exists as its own route because the HTML `download` attribute is ignored
+cross-origin, and the site is served from a different origin than this API. It sends
+`Content-Disposition: attachment` with a hyphenated form of the clip's display name, so a
+visitor saves `ass-eaten-by-these-bitches.mp3` rather than the storage filename. The audio
+itself is never modified — both routes stream the same bytes off disk.
 
 The frontend reads `PUBLIC_SOUNDBOARD_API_URL` from `web/.env`.
