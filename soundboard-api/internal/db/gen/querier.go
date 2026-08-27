@@ -10,8 +10,36 @@ import (
 
 type Querier interface {
 	CreateSoundbite(ctx context.Context, arg CreateSoundbiteParams) (Soundbite, error)
+	// CreateSoundbiteIfNew inserts a clip unless one with the same filename is already
+	// stored. On conflict no row is returned, so callers get sql.ErrNoRows and can treat
+	// that as "already imported" rather than a failure. This is what makes a bulk import
+	// safe to re-run after a partial failure.
+	CreateSoundbiteIfNew(ctx context.Context, arg CreateSoundbiteIfNewParams) (Soundbite, error)
+	// DeleteSoundbite removes a clip's row. Keyed by filename to match the names file and
+	// the audio dir; the caller is responsible for deleting the audio file itself.
+	DeleteSoundbite(ctx context.Context, filename string) (int64, error)
 	GetSoundbite(ctx context.Context, id int64) (Soundbite, error)
+	// IncrementPlayCount bumps a clip's play tally by one and returns the new total.
+	//
+	// The increment is computed inside SQLite rather than read-then-written in Go, so two
+	// plays arriving at once cannot read the same starting value and lose a count. A
+	// missing id yields no row, which the handler reports as a 404.
+	IncrementPlayCount(ctx context.Context, id int64) (int64, error)
 	ListSoundbites(ctx context.Context) ([]Soundbite, error)
+	// ResetAllPlayCounts zeroes every tally. Used to clear test plays before launch.
+	ResetAllPlayCounts(ctx context.Context) (int64, error)
+	// ResetPlayCount zeroes one clip's tally.
+	ResetPlayCount(ctx context.Context, filename string) (int64, error)
+	// SetPlayCount overwrites a clip's tally outright. Used when merging duplicates, so the
+	// surviving clip keeps the plays its copies had rather than losing them.
+	SetPlayCount(ctx context.Context, arg SetPlayCountParams) (int64, error)
+	// SetSoundbiteDateMade records when a clip was originally made. Filenames carry no date,
+	// so this is filled in by hand after import. Passing NULL clears it.
+	SetSoundbiteDateMade(ctx context.Context, arg SetSoundbiteDateMadeParams) (int64, error)
+	// UpdateSoundbiteName re-labels a clip without touching its audio or play count.
+	// Keyed by filename so the names file can be written against files on disk rather than
+	// database ids the user never sees.
+	UpdateSoundbiteName(ctx context.Context, arg UpdateSoundbiteNameParams) error
 }
 
 var _ Querier = (*Queries)(nil)

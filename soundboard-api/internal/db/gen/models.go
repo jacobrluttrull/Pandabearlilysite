@@ -15,4 +15,5 @@ type Soundbite struct {
 	DateStored    string         `json:"date_stored"`
 	DateMade      sql.NullString `json:"date_made"`
 	LengthSeconds float64        `json:"length_seconds"`
+	PlayCount     int64          `json:"play_count"`
 }

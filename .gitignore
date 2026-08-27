@@ -32,6 +32,9 @@ dist/
 # soundboard-api local runtime data (db file + uploaded audio)
 soundboard-api/data/
 
+# raw clip staging folder — source audio, copied into data/audio by `cli import`
+/Pandalily Soundbites/
+
 # Environment
 .env
 .env.*

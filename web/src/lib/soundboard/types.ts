@@ -5,4 +5,5 @@ export interface Soundbite {
 	date_stored: string;
 	length_seconds: number;
 	audio_url: string;
+	play_count: number;
 }

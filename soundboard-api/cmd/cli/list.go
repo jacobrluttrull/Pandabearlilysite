@@ -3,27 +3,16 @@ package main
 import (
 	"context"
 	"fmt"
-
-	"soundboard-api/internal/config"
-	sbdb "soundboard-api/internal/db"
-	"soundboard-api/internal/db/gen"
 )
 
 func runList(args []string) error {
-	cfg := config.Load()
-
-	sqlDB, err := sbdb.Open(cfg.DBPath)
+	st, err := openStore()
 	if err != nil {
-		return fmt.Errorf("open database: %w", err)
+		return err
 	}
-	defer sqlDB.Close()
+	defer st.Close()
 
-	if err := sbdb.Migrate(sqlDB); err != nil {
-		return fmt.Errorf("run migrations: %w", err)
-	}
-
-	queries := gen.New(sqlDB)
-	soundbites, err := queries.ListSoundbites(context.Background())
+	soundbites, err := st.queries.ListSoundbites(context.Background())
 	if err != nil {
 		return fmt.Errorf("list soundbites: %w", err)
 	}
@@ -38,7 +27,8 @@ func runList(args []string) error {
 		if sb.DateMade.Valid {
 			dateMade = sb.DateMade.String
 		}
-		fmt.Printf("#%-4d %-30s %6.1fs  made:%-12s file:%s\n", sb.ID, sb.Name, sb.LengthSeconds, dateMade, sb.Filename)
+		fmt.Printf("#%-4d %-30s %6.1fs  %6d plays  made:%-12s file:%s\n",
+			sb.ID, sb.Name, sb.LengthSeconds, sb.PlayCount, dateMade, sb.Filename)
 	}
 	return nil
 }

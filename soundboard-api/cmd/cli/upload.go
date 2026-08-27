@@ -3,66 +3,102 @@ package main
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"flag"
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
-	"soundboard-api/internal/config"
-	sbdb "soundboard-api/internal/db"
+	"soundboard-api/internal/audio"
 	"soundboard-api/internal/db/gen"
 )
 
+// runUpload adds a single clip — the everyday path for "I made a new soundbite".
+//
+// Only the file is required. The clip's length is measured from the audio itself and its
+// label is derived from the filename, so adding a clip is one command with one argument.
+// Both can still be given explicitly when the defaults are not what you want.
 func runUpload(args []string) error {
 	fs := flag.NewFlagSet("upload", flag.ExitOnError)
-	name := fs.String("name", "", "display name shown on the soundboard (required)")
-	file := fs.String("file", "", "path to the audio file to upload (required)")
-	dateMade := fs.String("date-made", "", "date the clip was made, e.g. 2026-08-19 (optional)")
-	length := fs.Float64("length", 0, "clip length in seconds (required)")
+	file := fs.String("file", "", "path to the audio file to add (required)")
+	name := fs.String("name", "", "display name (default: derived from the filename)")
+	dateMade := fs.String("date-made", "", "date the clip was made, e.g. 2026-08-27 (optional)")
+	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
-	if *name == "" || *file == "" || *length <= 0 {
+	// Allow `cli upload some-clip.mp3` as well as `cli upload -file some-clip.mp3`.
+	if *file == "" && fs.NArg() == 1 {
+		*file = fs.Arg(0)
+	}
+	if *file == "" {
 		fs.Usage()
-		return fmt.Errorf("-name, -file, and -length are required")
+		return errors.New("-file is required")
 	}
 
-	cfg := config.Load()
+	if *dateMade != "" {
+		if _, err := time.Parse("2006-01-02", *dateMade); err != nil {
+			return fmt.Errorf("date-made must look like 2026-08-27: %w", err)
+		}
+	}
 
-	if err := os.MkdirAll(cfg.AudioDir, 0o755); err != nil {
+	seconds, err := audio.MP3Duration(*file)
+	if err != nil {
+		return fmt.Errorf("measure %s: %w", *file, err)
+	}
+
+	st, err := openStore()
+	if err != nil {
+		return err
+	}
+	defer st.Close()
+
+	if err := os.MkdirAll(st.cfg.AudioDir, 0o755); err != nil {
 		return fmt.Errorf("create audio dir: %w", err)
 	}
 
-	sqlDB, err := sbdb.Open(cfg.DBPath)
-	if err != nil {
-		return fmt.Errorf("open database: %w", err)
-	}
-	defer sqlDB.Close()
-
-	if err := sbdb.Migrate(sqlDB); err != nil {
-		return fmt.Errorf("run migrations: %w", err)
-	}
-
 	filename := filepath.Base(*file)
-	destPath := filepath.Join(cfg.AudioDir, filename)
+	destPath := filepath.Join(st.cfg.AudioDir, filename)
 
-	if err := copyFile(*file, destPath); err != nil {
+	overrides, err := loadNameOverrides(*namesPath)
+	if err != nil {
+		return err
+	}
+
+	label := *name
+	if label == "" {
+		label = nameFor(filename, overrides)
+	}
+
+	copied, err := copyFileIfMissing(*file, destPath)
+	if err != nil {
 		return fmt.Errorf("copy audio file: %w", err)
 	}
 
-	queries := gen.New(sqlDB)
-	created, err := queries.CreateSoundbite(context.Background(), gen.CreateSoundbiteParams{
-		Name:          *name,
+	created, err := st.queries.CreateSoundbiteIfNew(context.Background(), gen.CreateSoundbiteIfNewParams{
+		Name:          label,
 		Filename:      filename,
 		DateMade:      sql.NullString{String: *dateMade, Valid: *dateMade != ""},
-		LengthSeconds: *length,
+		LengthSeconds: seconds,
 	})
+	if errors.Is(err, sql.ErrNoRows) {
+		return fmt.Errorf("%s is already stored — use `cli rename` to relabel it", filename)
+	}
 	if err != nil {
-		os.Remove(destPath)
+		if copied {
+			os.Remove(destPath)
+		}
 		return fmt.Errorf("save soundbite: %w", err)
 	}
 
-	fmt.Printf("uploaded %q as soundbite #%d (%s)\n", created.Name, created.ID, filename)
+	// Record the label so it survives a later apply-names run.
+	overrides[filename] = label
+	if err := saveNameOverrides(*namesPath, overrides); err != nil {
+		return err
+	}
+
+	fmt.Printf("added %q as soundbite #%d (%s, %.1fs)\n", created.Name, created.ID, filename, seconds)
 	return nil
 }

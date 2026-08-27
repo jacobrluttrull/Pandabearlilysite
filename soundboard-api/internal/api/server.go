@@ -22,6 +22,7 @@ func NewHandler(queries *gen.Queries, audioDir, allowedOrigin string) http.Handl
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /soundbites", s.handleListSoundbites)
 	mux.HandleFunc("GET /soundbites/{id}/audio", s.handleSoundbiteAudio)
+	mux.HandleFunc("POST /soundbites/{id}/play", s.handlePlaySoundbite)
 
 	return withCORS(allowedOrigin, mux)
 }

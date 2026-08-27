@@ -76,6 +76,12 @@
 	--surface-glass-bg: var(--color-surface);
 	--surface-glass-border: var(--color-border);
 
+	/* soundboard grid: 56 tiles at full surface weight read as a wall, so a tile
+	   rests on a quiet fill and near-invisible hairline and only takes on the full
+	   --surface-glass-* treatment on hover, focus, or while its clip plays */
+	--surface-quiet-bg: color-mix(in srgb, var(--color-surface) 50%, var(--color-bg));
+	--surface-quiet-border: color-mix(in srgb, var(--color-border) 28%, transparent);
+
 	--font-heading: 'Bricolage Grotesque', sans-serif;
 	--font-body: 'Plus Jakarta Sans', sans-serif;
 	/* system monospace stack — used only for the Ref Sheet's "technical
@@ -107,6 +113,12 @@
 	--space-4: 2.1rem;
 	--space-6: 3.15rem;
 	--container-max: 1200px;
+
+	/* clip-tile footprint: wide enough that most soundbite names land in two
+	   lines without clamping, short enough to stay scannable */
+	--tile-min-w: 10.5rem;
+	--tile-min-w-sm: 8.5rem;
+	--tile-min-h: 4.2rem;
 }
 
 :root[data-theme='bamboo'] {
@@ -129,4 +141,6 @@
 	--surface-blur: blur(20px);
 	--surface-glass-bg: color-mix(in srgb, var(--color-surface) 60%, transparent);
 	--surface-glass-border: color-mix(in srgb, var(--color-ink) 12%, transparent);
+	--surface-quiet-bg: color-mix(in srgb, var(--color-surface) 30%, transparent);
+	--surface-quiet-border: color-mix(in srgb, var(--color-ink) 7%, transparent);
 }

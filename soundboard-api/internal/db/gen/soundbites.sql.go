@@ -13,7 +13,7 @@ import (
 const createSoundbite = `-- name: CreateSoundbite :one
 INSERT INTO soundbites (name, filename, date_made, length_seconds)
 VALUES (?, ?, ?, ?)
-RETURNING id, name, filename, date_stored, date_made, length_seconds
+RETURNING id, name, filename, date_stored, date_made, length_seconds, play_count
 `
 
 type CreateSoundbiteParams struct {
@@ -38,12 +38,66 @@ func (q *Queries) CreateSoundbite(ctx context.Context, arg CreateSoundbiteParams
 		&i.DateStored,
 		&i.DateMade,
 		&i.LengthSeconds,
+		&i.PlayCount,
 	)
 	return i, err
 }
 
+const createSoundbiteIfNew = `-- name: CreateSoundbiteIfNew :one
+INSERT INTO soundbites (name, filename, date_made, length_seconds)
+VALUES (?, ?, ?, ?)
+ON CONFLICT (filename) DO NOTHING
+RETURNING id, name, filename, date_stored, date_made, length_seconds, play_count
+`
+
+type CreateSoundbiteIfNewParams struct {
+	Name          string         `json:"name"`
+	Filename      string         `json:"filename"`
+	DateMade      sql.NullString `json:"date_made"`
+	LengthSeconds float64        `json:"length_seconds"`
+}
+
+// CreateSoundbiteIfNew inserts a clip unless one with the same filename is already
+// stored. On conflict no row is returned, so callers get sql.ErrNoRows and can treat
+// that as "already imported" rather than a failure. This is what makes a bulk import
+// safe to re-run after a partial failure.
+func (q *Queries) CreateSoundbiteIfNew(ctx context.Context, arg CreateSoundbiteIfNewParams) (Soundbite, error) {
+	row := q.db.QueryRowContext(ctx, createSoundbiteIfNew,
+		arg.Name,
+		arg.Filename,
+		arg.DateMade,
+		arg.LengthSeconds,
+	)
+	var i Soundbite
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.Filename,
+		&i.DateStored,
+		&i.DateMade,
+		&i.LengthSeconds,
+		&i.PlayCount,
+	)
+	return i, err
+}
+
+const deleteSoundbite = `-- name: DeleteSoundbite :execrows
+DELETE FROM soundbites
+WHERE filename = ?
+`
+
+// DeleteSoundbite removes a clip's row. Keyed by filename to match the names file and
+// the audio dir; the caller is responsible for deleting the audio file itself.
+func (q *Queries) DeleteSoundbite(ctx context.Context, filename string) (int64, error) {
+	result, err := q.db.ExecContext(ctx, deleteSoundbite, filename)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
 const getSoundbite = `-- name: GetSoundbite :one
-SELECT id, name, filename, date_stored, date_made, length_seconds
+SELECT id, name, filename, date_stored, date_made, length_seconds, play_count
 FROM soundbites
 WHERE id = ?
 LIMIT 1
@@ -59,12 +113,32 @@ func (q *Queries) GetSoundbite(ctx context.Context, id int64) (Soundbite, error)
 		&i.DateStored,
 		&i.DateMade,
 		&i.LengthSeconds,
+		&i.PlayCount,
 	)
 	return i, err
 }
 
+const incrementPlayCount = `-- name: IncrementPlayCount :one
+UPDATE soundbites
+SET play_count = play_count + 1
+WHERE id = ?
+RETURNING play_count
+`
+
+// IncrementPlayCount bumps a clip's play tally by one and returns the new total.
+//
+// The increment is computed inside SQLite rather than read-then-written in Go, so two
+// plays arriving at once cannot read the same starting value and lose a count. A
+// missing id yields no row, which the handler reports as a 404.
+func (q *Queries) IncrementPlayCount(ctx context.Context, id int64) (int64, error) {
+	row := q.db.QueryRowContext(ctx, incrementPlayCount, id)
+	var play_count int64
+	err := row.Scan(&play_count)
+	return play_count, err
+}
+
 const listSoundbites = `-- name: ListSoundbites :many
-SELECT id, name, filename, date_stored, date_made, length_seconds
+SELECT id, name, filename, date_stored, date_made, length_seconds, play_count
 FROM soundbites
 ORDER BY name COLLATE NOCASE ASC
 `
@@ -85,6 +159,7 @@ func (q *Queries) ListSoundbites(ctx context.Context) ([]Soundbite, error) {
 			&i.DateStored,
 			&i.DateMade,
 			&i.LengthSeconds,
+			&i.PlayCount,
 		); err != nil {
 			return nil, err
 		}
@@ -97,4 +172,94 @@ func (q *Queries) ListSoundbites(ctx context.Context) ([]Soundbite, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const resetAllPlayCounts = `-- name: ResetAllPlayCounts :execrows
+UPDATE soundbites
+SET play_count = 0
+`
+
+// ResetAllPlayCounts zeroes every tally. Used to clear test plays before launch.
+func (q *Queries) ResetAllPlayCounts(ctx context.Context) (int64, error) {
+	result, err := q.db.ExecContext(ctx, resetAllPlayCounts)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const resetPlayCount = `-- name: ResetPlayCount :execrows
+UPDATE soundbites
+SET play_count = 0
+WHERE filename = ?
+`
+
+// ResetPlayCount zeroes one clip's tally.
+func (q *Queries) ResetPlayCount(ctx context.Context, filename string) (int64, error) {
+	result, err := q.db.ExecContext(ctx, resetPlayCount, filename)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const setPlayCount = `-- name: SetPlayCount :execrows
+UPDATE soundbites
+SET play_count = ?
+WHERE filename = ?
+`
+
+type SetPlayCountParams struct {
+	PlayCount int64  `json:"play_count"`
+	Filename  string `json:"filename"`
+}
+
+// SetPlayCount overwrites a clip's tally outright. Used when merging duplicates, so the
+// surviving clip keeps the plays its copies had rather than losing them.
+func (q *Queries) SetPlayCount(ctx context.Context, arg SetPlayCountParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, setPlayCount, arg.PlayCount, arg.Filename)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const setSoundbiteDateMade = `-- name: SetSoundbiteDateMade :execrows
+UPDATE soundbites
+SET date_made = ?
+WHERE filename = ?
+`
+
+type SetSoundbiteDateMadeParams struct {
+	DateMade sql.NullString `json:"date_made"`
+	Filename string         `json:"filename"`
+}
+
+// SetSoundbiteDateMade records when a clip was originally made. Filenames carry no date,
+// so this is filled in by hand after import. Passing NULL clears it.
+func (q *Queries) SetSoundbiteDateMade(ctx context.Context, arg SetSoundbiteDateMadeParams) (int64, error) {
+	result, err := q.db.ExecContext(ctx, setSoundbiteDateMade, arg.DateMade, arg.Filename)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+const updateSoundbiteName = `-- name: UpdateSoundbiteName :exec
+UPDATE soundbites
+SET name = ?
+WHERE filename = ?
+`
+
+type UpdateSoundbiteNameParams struct {
+	Name     string `json:"name"`
+	Filename string `json:"filename"`
+}
+
+// UpdateSoundbiteName re-labels a clip without touching its audio or play count.
+// Keyed by filename so the names file can be written against files on disk rather than
+// database ids the user never sees.
+func (q *Queries) UpdateSoundbiteName(ctx context.Context, arg UpdateSoundbiteNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateSoundbiteName, arg.Name, arg.Filename)
+	return err
 }

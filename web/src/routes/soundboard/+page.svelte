@@ -1,8 +1,9 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { env } from '$env/dynamic/public';
-	import { fetchSoundbites } from '$lib/soundboard/api';
+	import { fetchSoundbites, recordPlay } from '$lib/soundboard/api';
 	import type { Soundbite } from '$lib/soundboard/types';
+	import Button from '$lib/components/Button.svelte';
 	import PawPrint from '$lib/components/PawPrint.svelte';
 	import BambooStalk from '$lib/components/BambooStalk.svelte';
 
@@ -16,10 +17,20 @@
 	let nowPlayingId = $state<number | null>(null);
 	let audioEl = $state<HTMLAudioElement>();
 
+	// A full board is a wall of tiles on arrival, so it opens on a partial grid.
+	// Searching narrows the list on its own, so the cap steps out of the way.
+	const INITIAL_VISIBLE = 24;
+	let showAll = $state(false);
+
 	const filtered = $derived.by(() => {
 		const q = query.trim().toLowerCase();
 		return q ? soundbites.filter((clip) => clip.name.toLowerCase().includes(q)) : soundbites;
 	});
+
+	const searching = $derived(query.trim().length > 0);
+	const collapsed = $derived(!showAll && !searching && filtered.length > INITIAL_VISIBLE);
+	const visible = $derived(collapsed ? filtered.slice(0, INITIAL_VISIBLE) : filtered);
+	const restCount = $derived(filtered.length - visible.length);
 
 	onMount(async () => {
 		try {
@@ -35,10 +46,33 @@
 		audioEl.src = `${baseUrl}${clip.audio_url}`;
 		nowPlayingId = clip.id;
 		audioEl.play();
+		countPlay(clip);
+	}
+
+	// Clips run a second or two, so pressing the tile is the play — the tally is not
+	// held back waiting for playback to finish.
+	async function countPlay(clip: Soundbite) {
+		// Move the number immediately so the tile feels responsive, then reconcile with
+		// the server's real total once the request lands.
+		clip.play_count += 1;
+		try {
+			clip.play_count = await recordPlay(baseUrl, clip.id);
+		} catch {
+			// A lost tally is not worth interrupting playback over; the optimistic
+			// bump stands until the next page load corrects it.
+		}
 	}
 
 	function handleEnded() {
 		nowPlayingId = null;
+	}
+
+	// Keeps long tallies from widening a tile: 999 -> "999", 1240 -> "1.2k".
+	function formatCount(plays: number): string {
+		if (plays < 1000) return String(plays);
+		if (plays < 10_000) return `${(plays / 1000).toFixed(1)}k`;
+		if (plays < 1_000_000) return `${Math.round(plays / 1000)}k`;
+		return `${(plays / 1_000_000).toFixed(1)}m`;
 	}
 
 	function formatDuration(totalSeconds: number): string {
@@ -62,14 +96,24 @@
 		<BambooStalk segments={2} leaf sway class="header-stalk" aria-hidden="true" />
 	</div>
 
-	<label class="search">
-		<svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
-			<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
-			<line x1="15.3" y1="15.3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-		</svg>
-		<span class="sr-only">Search sounds</span>
-		<input type="search" placeholder="Search sounds…" bind:value={query} />
-	</label>
+	<div class="search-row">
+		<label class="search">
+			<svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true">
+				<circle cx="10.5" cy="10.5" r="6.5" fill="none" stroke="currentColor" stroke-width="2" />
+				<line x1="15.3" y1="15.3" x2="21" y2="21" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+			</svg>
+			<span class="sr-only">Search sounds</span>
+			<input type="search" placeholder="Search sounds…" bind:value={query} />
+		</label>
+
+		{#if status === 'ready' && soundbites.length > 0}
+			<p class="clip-count" aria-live="polite">
+				{searching
+					? `${filtered.length} of ${soundbites.length} clips`
+					: `${soundbites.length} clips`}
+			</p>
+		{/if}
+	</div>
 
 	{#if status === 'loading'}
 		<p class="status-message">
@@ -85,8 +129,8 @@
 				: `Nothing rings back for "${query}" — try another search.`}
 		</p>
 	{:else}
-		<div class="grid">
-			{#each filtered as clip (clip.id)}
+		<div class="grid" class:collapsed>
+			{#each visible as clip (clip.id)}
 				{@const playing = nowPlayingId === clip.id}
 				<button
 					type="button"
@@ -106,11 +150,38 @@
 						<span class="bars" class:animate={playing} aria-hidden="true">
 							<i></i><i></i><i></i>
 						</span>
-						<span class="duration">{formatDuration(clip.length_seconds)}</span>
+						<span class="meta-stats">
+							<span class="plays">
+								<svg viewBox="0 0 12 12" width="9" height="9" aria-hidden="true">
+									<path d="M2.5 1.3 10 6l-7.5 4.7z" fill="currentColor" />
+								</svg>
+								{formatCount(clip.play_count)}
+								<span class="sr-only">
+									{clip.play_count === 1 ? 'play' : 'plays'}
+								</span>
+							</span>
+							<span class="duration">{formatDuration(clip.length_seconds)}</span>
+						</span>
 					</span>
 				</button>
 			{/each}
 		</div>
+
+		{#if !searching && filtered.length > INITIAL_VISIBLE}
+			<div class="more-row">
+				<Button
+					variant="secondary"
+					size="sm"
+					aria-expanded={showAll}
+					onclick={() => (showAll = !showAll)}
+				>
+					{showAll ? 'Show fewer clips' : `Show all ${filtered.length} clips`}
+				</Button>
+				{#if collapsed}
+					<span class="more-hint">{restCount} more waiting in the grove</span>
+				{/if}
+			</div>
+		{/if}
 	{/if}
 </section>
 
@@ -162,12 +233,29 @@
 	}
 
 	/* search */
+	.search-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: space-between;
+		gap: var(--space-2);
+		margin-bottom: var(--space-3);
+	}
+
 	.search {
 		position: relative;
 		display: block;
-		width: 100%;
+		flex: 1 1 18rem;
 		max-width: 26rem;
-		margin-bottom: var(--space-4);
+	}
+
+	/* orientation: how big the board is, and how much of it the search left */
+	.clip-count {
+		margin: 0;
+		color: var(--color-text-muted);
+		font: var(--text-label-sm);
+		letter-spacing: 0.02em;
+		font-variant-numeric: tabular-nums;
 	}
 
 	.search-icon {
@@ -267,21 +355,24 @@
 	/* clip grid */
 	.grid {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
-		gap: var(--space-2);
+		grid-template-columns: repeat(auto-fill, minmax(var(--tile-min-w), 1fr));
+		gap: var(--space-1);
 	}
 
+	/* A tile rests quiet — soft fill, hairline edge — and only takes on the
+	   theme's full surface treatment when it's hovered, focused, or sounding.
+	   56 tiles at full weight is the wall; 56 tiles at rest is a field. */
 	.clip-tile {
 		display: flex;
 		flex-direction: column;
 		align-items: flex-start;
 		justify-content: space-between;
-		gap: var(--space-2);
-		min-height: 5.5rem;
-		padding: var(--space-2) var(--space-3);
-		border-radius: var(--radius-lg);
-		border: 1px solid var(--surface-glass-border);
-		background: var(--surface-glass-bg);
+		gap: var(--space-1);
+		min-height: var(--tile-min-h);
+		padding: var(--space-2);
+		border-radius: var(--radius);
+		border: 1px solid var(--surface-quiet-border);
+		background: var(--surface-quiet-bg);
 		backdrop-filter: var(--surface-blur);
 		-webkit-backdrop-filter: var(--surface-blur);
 		color: var(--color-text);
@@ -291,16 +382,16 @@
 		transition:
 			transform 0.15s ease,
 			border-color 0.2s ease,
+			background-color 0.2s ease,
 			box-shadow 0.2s ease;
 	}
 
+	/* the name carries the tile — it wraps to as many lines as it needs
+	   rather than truncating mid-word */
 	.clip-name {
-		display: -webkit-box;
-		-webkit-line-clamp: 2;
-		-webkit-box-orient: vertical;
-		overflow: hidden;
 		font-weight: 600;
 		line-height: 1.3;
+		overflow-wrap: break-word;
 	}
 
 	.clip-name :global(.playing-paw) {
@@ -319,16 +410,57 @@
 		width: 100%;
 	}
 
+	.meta-stats {
+		display: inline-flex;
+		align-items: center;
+		gap: var(--space-2);
+		min-width: 0;
+	}
+
 	.duration {
 		font: var(--text-label-sm);
 		color: var(--color-text-muted);
 		font-variant-numeric: tabular-nums;
 	}
 
-	.clip-tile:hover:not(.playing) {
+	.plays {
+		display: inline-flex;
+		align-items: center;
+		gap: 0.3em;
+		font: var(--text-label-sm);
+		color: var(--color-text-muted);
+		font-variant-numeric: tabular-nums;
+	}
+
+	/* the tally leans into the canopy gold while its clip is sounding, so the number
+	   reads as "this just went up" rather than as static metadata */
+	.clip-tile.playing .plays {
+		color: var(--color-canopy-strong);
+	}
+
+	/* the waveform only speaks while a clip is sounding — 56 dormant glyphs is
+	   noise, so an idle tile holds the space without spending the ink */
+	.clip-tile .bars {
+		opacity: 0;
+		transition: opacity 0.2s ease;
+	}
+
+	.clip-tile.playing .bars {
+		opacity: 1;
+	}
+
+	.clip-tile:hover:not(.playing),
+	.clip-tile:focus-visible:not(.playing) {
+		background: var(--surface-glass-bg);
 		border-color: var(--color-accent);
 		transform: translateY(-2px);
 		box-shadow: 0 0 0.9rem color-mix(in srgb, var(--color-accent) 30%, transparent);
+	}
+
+	/* metadata sits back at rest and steps up when the tile is engaged */
+	.clip-tile:hover:not(.playing) :is(.plays, .duration),
+	.clip-tile:focus-visible:not(.playing) :is(.plays, .duration) {
+		color: var(--color-text);
 	}
 
 	.clip-tile:focus-visible {
@@ -336,10 +468,26 @@
 		outline-offset: 2px;
 	}
 
+	/* revealing the rest of the board */
+	.more-row {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space-2);
+		margin-top: var(--space-3);
+	}
+
+	.more-hint {
+		color: var(--color-text-muted);
+		font: var(--text-label-sm);
+		font-variant-numeric: tabular-nums;
+	}
+
 	/* signature move: a tile that's actually playing comes alive — the paw
 	   glyph steps in, the waveform snaps into an equalizer, and the whole
 	   tile breathes between canopy gold and rust glow */
 	.clip-tile.playing {
+		background: var(--surface-glass-bg);
 		border-color: var(--color-canopy-strong);
 		animation: chime-glow 1.6s ease-in-out infinite;
 	}
@@ -395,6 +543,27 @@
 		}
 	}
 
+	/* reduced motion keeps every state cue — gold border, lit waveform, paw —
+	   and drops only the looping movement */
+	@media (prefers-reduced-motion: reduce) {
+		.clip-tile,
+		.clip-tile.playing,
+		.clip-tile:active,
+		.bars.animate i,
+		.clip-name :global(.playing-paw) {
+			animation: none;
+			transition: none;
+		}
+
+		.clip-tile.playing {
+			box-shadow: 0 0 0 1px var(--color-canopy-strong) inset;
+		}
+
+		.bars.animate i {
+			height: 100%;
+		}
+	}
+
 	@media (max-width: 480px) {
 		.header-row {
 			align-items: flex-start;
@@ -402,6 +571,12 @@
 
 		:global(.header-stalk) {
 			display: none;
+		}
+
+		/* a phone still holds two columns — one column of tall tiles turns the
+		   board into a very long scroll */
+		.grid {
+			grid-template-columns: repeat(auto-fill, minmax(var(--tile-min-w-sm), 1fr));
 		}
 	}
 </style>

@@ -4,6 +4,7 @@ go 1.26.7
 
 require (
 	github.com/pressly/goose/v3 v3.27.3
+	github.com/tcolgate/mp3 v0.0.0-20170426193717-e79c5a46d300
 	modernc.org/sqlite v1.57.0
 )
 
