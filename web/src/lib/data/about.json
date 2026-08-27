@@ -1,14 +1,22 @@
 {
 	"name": "PandaLily",
 	"role": "Spirit Guardian",
-	"tags": ["Half-panda", "Half-girl", "Bamboo Spirit"],
-	"bio": "Half girl, half red panda, and full-time caretaker of the Zenith Bamboo grove. PandaLily drifted out of the forest one day, decided streaming was more fun than hibernating, and never really left.",
-	"duty": "Keeping the bamboo forest calm and green, looking after the spirits (and viewers) who wander through it, and making sure nobody leaves without a snack.",
+	"tags": ["Half-Girl", "Half-Panda", "Bamboo Spirit"],
+	"bio": "Lily is the spirit guardian of the bamboo forest, tasked with protecting all creatures that reside within it from harm. Half girl, half panda, she can travel freely between the land of the living and the spirit realm. The forest has been at peace for some time, so with her guardian duties light these days, she spends her time searching for new friends while still caring for the home she calls her own.",
+	"duty": "In times of turmoil, Lily is a fierce warrior — trained by the Ancients, wielding weapons she's crafted herself, favoring the three-sectional staff. The will of the forest was bestowed on her as a child, leaving her with a forehead marking. Her aggressors know her by another name entirely, one spoken only in hushed, scared whispers — lest it wake the beast behind the bamboo stalks.",
 	"vitals": [
-		{ "label": "Species", "value": "Red panda spirit" },
+		{ "label": "Species", "value": "Half-girl, half-panda" },
 		{ "label": "Role", "value": "Spirit Guardian" },
-		{ "label": "Home", "value": "Zenith Bamboo Grove" }
+		{ "label": "Home", "value": "The Bamboo Forest" }
 	],
-	"affinities": ["Bamboo shoots", "Naps in sunbeams", "Chat being silly"],
-	"aversions": ["Empty snack bowls", "Loud thunderstorms", "Being called a raccoon"]
+	"affinities": [
+		"Plushies",
+		"Ice cream",
+		"Trinkets",
+		"Long socks",
+		"Martial arts",
+		"Sunflowers",
+		"Crystal shrimp hand rolls"
+	],
+	"aversions": ["Peanut butter", "Heights", "Being abandoned", "Zombies"]
 }

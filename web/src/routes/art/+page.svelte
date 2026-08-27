@@ -9,7 +9,7 @@
 
 <Gallery
 	heading="Art"
-	subtitle="Commissioned art made by these wonderful artists — credited with thanks."
+	subtitle="Collection of Pandalily artwork, I thank all the artists for their work and support!"
 	entries={artists}
 	linkLabel="Visit portfolio"
 />

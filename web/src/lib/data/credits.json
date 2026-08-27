@@ -2,30 +2,30 @@
 	{
 		"category": "Live2D Model",
 		"entries": [
-			{ "role": "Art", "name": "TBD", "url": "" },
-			{ "role": "Rigging", "name": "TBD", "url": "" }
+			{ "role": "Art", "name": "ku-ini", "url": "", "image": "/images/credits/model-art.png" },
+			{ "role": "Rigging", "name": "Willow", "url": "", "image": "/images/credits/live2d-rigging.png" }
 		]
 	},
 	{
 		"category": "Stream Assets & Screens",
 		"entries": [
-			{ "role": "Logo", "name": "TBD", "url": "" },
-			{ "role": "Starting Screen", "name": "TBD", "url": "" },
-			{ "role": "Background", "name": "TBD", "url": "" },
-			{ "role": "Ending Screen", "name": "TBD", "url": "" }
+			{ "role": "Logo", "name": "TBD", "url": "", "image": "/images/credits/logo.png" },
+			{ "role": "Starting Screen", "name": "TBD", "url": "", "image": "/images/credits/starting-screen.png" },
+			{ "role": "Background", "name": "TBD", "url": "", "image": "/images/credits/background.png" },
+			{ "role": "Ending Screen", "name": "TBD", "url": "", "image": "/images/credits/ending-screen.png" }
 		]
 	},
 	{
 		"category": "Emotes",
 		"entries": [
-			{ "role": "Emote Set", "name": "TBD", "url": "" }
+			{ "role": "Emote Set 1", "name": "cunibunny", "url": "", "image": "/images/credits/emote-artist-1.png" },
+			{ "role": "Emote Set 2", "name": "kyupo", "url": "", "image": "/images/credits/emote-artist-2.png" }
 		]
 	},
 	{
 		"category": "Music",
 		"entries": [
-			{ "role": "Intro Theme", "name": "TBD", "url": "" },
-			{ "role": "Outro Theme", "name": "TBD", "url": "" }
+			{ "role": "BGM 1", "name": "nienta", "url": "", "image": "/images/credits/bgm-1.png" }
 		]
 	}
 ]

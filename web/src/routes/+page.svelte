@@ -11,8 +11,8 @@
 <section class="hero">
 	<div class="hero-avatar-wrap">
 		<div class="canopy-glow" aria-hidden="true"></div>
-		<div class="hero-avatar" aria-hidden="true">
-			<span class="avatar-mark">PL</span>
+		<div class="hero-avatar">
+			<img class="avatar-portrait" src="/images/pfp.png" alt="PandaLily" />
 		</div>
 	</div>
 
@@ -131,9 +131,6 @@
 		height: 100%;
 		border-radius: 50%;
 		background: var(--color-surface-alt);
-		display: flex;
-		align-items: center;
-		justify-content: center;
 		border: 2px dashed color-mix(in srgb, var(--color-canopy) 70%, var(--color-accent) 30%);
 		box-shadow:
 			inset 0 0 0 6px var(--color-bg),
@@ -141,11 +138,14 @@
 			0 0 2.5rem color-mix(in srgb, var(--color-canopy) 35%, transparent);
 	}
 
-	.avatar-mark {
-		font-family: var(--font-heading);
-		font-size: 2.25rem;
-		font-weight: 800;
-		color: var(--color-accent-strong);
+	.avatar-portrait {
+		position: absolute;
+		inset: 8px;
+		width: calc(100% - 16px);
+		height: calc(100% - 16px);
+		border-radius: 50%;
+		object-fit: cover;
+		object-position: top center;
 	}
 
 	.hero :global(.eyebrow-chip) {

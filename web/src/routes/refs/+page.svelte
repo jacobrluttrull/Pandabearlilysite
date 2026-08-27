@@ -12,17 +12,6 @@
 
 	const entries = refSheet as RefEntry[];
 
-	// the palette entry has no photographed reference to show — but unlike the
-	// other placeholders, we *do* know its real content: the site's own design
-	// tokens. Swap the placeholder for live swatches instead of a "pending" stamp.
-	const paletteSwatches = [
-		{ name: 'Forest', token: '--color-accent' },
-		{ name: 'Deep Grove', token: '--color-accent-strong' },
-		{ name: 'Canopy', token: '--color-canopy' },
-		{ name: 'Panda Rust', token: '--color-panda-rust' },
-		{ name: 'Ink', token: '--color-ink' }
-	];
-
 	function pad(n: number) {
 		return String(n).padStart(2, '0');
 	}
@@ -36,7 +25,7 @@
 	}
 
 	function showsImage(entry: RefEntry) {
-		return entry.id !== 'color-palette' && entry.image && !failed[entry.id];
+		return entry.image && !failed[entry.id];
 	}
 </script>
 
@@ -65,17 +54,7 @@
 					<span class="crop bl" aria-hidden="true"></span>
 					<span class="crop br" aria-hidden="true"></span>
 
-					{#if entry.id === 'color-palette'}
-						<div class="swatch-plate">
-							{#each paletteSwatches as swatch (swatch.token)}
-								<div class="swatch">
-									<span class="swatch-chip" style={`background: var(${swatch.token})`}></span>
-									<span class="swatch-name">{swatch.name}</span>
-									<span class="swatch-token">{swatch.token.replace('--color-', '')}</span>
-								</div>
-							{/each}
-						</div>
-					{:else if showsImage(entry)}
+					{#if showsImage(entry)}
 						<img src={entry.image} alt={entry.title} onerror={() => markFailed(entry.id)} />
 					{:else}
 						<div class="plate-stamp">
@@ -274,46 +253,6 @@
 		letter-spacing: 0.1em;
 		line-height: 1.35;
 		color: color-mix(in srgb, var(--color-panda-rust) 80%, var(--color-text));
-	}
-
-	/* color-palette special case: real swatches pulled from the live tokens */
-	.swatch-plate {
-		position: absolute;
-		inset: 0;
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(4.5rem, 1fr));
-		align-content: center;
-		gap: 0.5rem;
-		padding: var(--space-2) calc(var(--space-2) + 0.4rem);
-	}
-
-	.swatch {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		gap: 0.3rem;
-		text-align: center;
-	}
-
-	.swatch-chip {
-		width: 2rem;
-		height: 2rem;
-		border-radius: var(--radius-full);
-		border: 2px solid var(--color-surface);
-		box-shadow: 0 0 0 1px color-mix(in srgb, var(--color-ink) 20%, transparent);
-	}
-
-	.swatch-name {
-		font: var(--text-label-sm);
-		color: var(--color-text);
-	}
-
-	.swatch-token {
-		font: var(--text-mono-sm);
-		font-weight: 500;
-		font-size: 0.6rem;
-		color: var(--color-text-muted);
-		word-break: break-all;
 	}
 
 	.plate-caption {

@@ -20,10 +20,6 @@
 <section class="about-page">
 	<header class="page-header">
 		<h1>{about.name}</h1>
-		<p class="lede">
-			Field notes on the spirit guardian of the Zenith Bamboo Grove — species, duty, and a
-			running log of what she loves (and loathes).
-		</p>
 	</header>
 
 	<div class="registry-grid">
@@ -32,7 +28,7 @@
 				<div class="id-block">
 					<div class="specimen">
 						<div class="avatar-ring">
-							<div class="avatar" aria-hidden="true">PL</div>
+							<img class="avatar" src="/images/pfp.png" alt="PandaLily" />
 						</div>
 					</div>
 					<div class="id-info">
@@ -50,7 +46,7 @@
 			<p class="bio">{about.bio}</p>
 
 			<div class="duty">
-				<h3>Duty</h3>
+				<h3>Lore</h3>
 				<p>{about.duty}</p>
 			</div>
 		</Card>
@@ -69,7 +65,7 @@
 		</Card>
 
 		<Card class="provisions-card">
-			<h3>Provisions</h3>
+			<h3>Favorite Things</h3>
 			<ul class="provisions-list">
 				{#each about.affinities as item (item)}
 					<li><PawPrint size={12} /> {item}</li>
@@ -120,7 +116,6 @@
 	.registry-grid {
 		display: grid;
 		grid-template-columns: 1fr;
-		align-items: start;
 		gap: var(--space-3);
 	}
 
@@ -172,21 +167,9 @@
 		width: 4rem;
 		height: 4rem;
 		border-radius: 50%;
-		background: color-mix(in srgb, var(--color-accent) 18%, var(--color-surface-alt) 82%);
-		color: var(--color-accent-strong);
+		object-fit: cover;
+		object-position: top center;
 		border: 1px solid var(--color-border);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		font-family: var(--font-heading);
-		font-weight: 700;
-		font-size: 1.5rem;
-	}
-
-	/* bamboo: keep the flat badge fill it already had — the green text is
-	   unchanged, only cream gains the tinted background */
-	:global([data-theme='bamboo']) .avatar {
-		background: var(--color-surface-alt);
 	}
 
 	h2 {
