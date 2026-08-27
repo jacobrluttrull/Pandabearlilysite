@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"soundboard-api/internal/audio"
+	"soundboard-api/internal/clipname"
 	"soundboard-api/internal/db/gen"
 )
 
@@ -24,7 +25,7 @@ func runUpload(args []string) error {
 	file := fs.String("file", "", "path to the audio file to add (required)")
 	name := fs.String("name", "", "display name (default: derived from the filename)")
 	dateMade := fs.String("date-made", "", "date the clip was made, e.g. 2026-08-27 (optional)")
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -62,14 +63,14 @@ func runUpload(args []string) error {
 	filename := filepath.Base(*file)
 	destPath := filepath.Join(st.cfg.AudioDir, filename)
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
 
 	label := *name
 	if label == "" {
-		label = nameFor(filename, overrides)
+		label = clipname.For(filename, overrides)
 	}
 
 	copied, err := copyFileIfMissing(*file, destPath)
@@ -95,7 +96,7 @@ func runUpload(args []string) error {
 
 	// Record the label so it survives a later apply-names run.
 	overrides[filename] = label
-	if err := saveNameOverrides(*namesPath, overrides); err != nil {
+	if err := clipname.SaveOverrides(*namesPath, overrides); err != nil {
 		return err
 	}
 

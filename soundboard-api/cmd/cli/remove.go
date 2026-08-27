@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+
+	"soundboard-api/internal/clipname"
 )
 
 // runRemove deletes clips by filename: the database row, the stored audio file, and the
@@ -16,7 +18,7 @@ import (
 // should not delete the original off your disk.
 func runRemove(args []string) error {
 	fs := flag.NewFlagSet("remove", flag.ExitOnError)
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	dryRun := fs.Bool("dry-run", false, "show what would be removed without deleting anything")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -34,7 +36,7 @@ func runRemove(args []string) error {
 	}
 	defer st.Close()
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
@@ -70,7 +72,7 @@ func runRemove(args []string) error {
 	}
 
 	if !*dryRun && removed > 0 {
-		if err := saveNameOverrides(*namesPath, overrides); err != nil {
+		if err := clipname.SaveOverrides(*namesPath, overrides); err != nil {
 			return err
 		}
 	}

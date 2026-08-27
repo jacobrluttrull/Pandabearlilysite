@@ -29,10 +29,12 @@ dist/
 *.sqlite
 *.sqlite3
 
-# soundboard-api local runtime data (db file + uploaded audio)
+# soundboard-api local runtime state — the SQLite db only. Clip audio lives in
+# soundboard-api/clips/ and IS committed: it ships in the Docker image, and it is
+# the only backup of the audio that exists.
 soundboard-api/data/
 
-# raw clip staging folder — source audio, copied into data/audio by `cli import`
+# raw clip staging folder — working copies, not the served collection
 /Pandalily Soundbites/
 
 # Environment

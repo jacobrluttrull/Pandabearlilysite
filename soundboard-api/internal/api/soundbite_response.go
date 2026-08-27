@@ -25,8 +25,8 @@ func toSoundbiteResponse(s gen.Soundbite) soundbiteResponse {
 		Name:          s.Name,
 		DateStored:    s.DateStored,
 		LengthSeconds: s.LengthSeconds,
-		AudioURL:      fmt.Sprintf("/soundbites/%d/audio", s.ID),
-		DownloadURL:   fmt.Sprintf("/soundbites/%d/download", s.ID),
+		AudioURL:      fmt.Sprintf("/api/soundbites/%d/audio", s.ID),
+		DownloadURL:   fmt.Sprintf("/api/soundbites/%d/download", s.ID),
 		PlayCount:     s.PlayCount,
 	}
 	if s.DateMade.Valid {

@@ -1,13 +1,14 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { env } from '$env/dynamic/public';
 	import { fetchSoundbites, recordPlay } from '$lib/soundboard/api';
 	import type { Soundbite } from '$lib/soundboard/types';
 	import Button from '$lib/components/Button.svelte';
 	import PawPrint from '$lib/components/PawPrint.svelte';
 	import BambooStalk from '$lib/components/BambooStalk.svelte';
 
-	const baseUrl = env.PUBLIC_SOUNDBOARD_API_URL || 'http://localhost:8080';
+	// Same-origin in production; in dev, Vite proxies /api to the Go process. Keeping
+	// the path relative means there is no environment-specific URL to configure.
+	const baseUrl = '';
 
 	type Status = 'loading' | 'error' | 'ready';
 

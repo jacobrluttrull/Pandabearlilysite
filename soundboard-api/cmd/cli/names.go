@@ -5,6 +5,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+
+	"soundboard-api/internal/clipname"
 )
 
 // runNames scaffolds or refreshes the names file, seeding an entry for every clip in a
@@ -15,7 +17,7 @@ import (
 func runNames(args []string) error {
 	fs := flag.NewFlagSet("names", flag.ExitOnError)
 	dir := fs.String("dir", "", "folder of .mp3 clips to seed names for (required)")
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -32,7 +34,7 @@ func runNames(args []string) error {
 		return fmt.Errorf("no .mp3 files found in %s", *dir)
 	}
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
@@ -43,7 +45,7 @@ func runNames(args []string) error {
 			kept++
 			continue
 		}
-		overrides[filename] = displayName(filename)
+		overrides[filename] = clipname.DisplayName(filename)
 		added++
 	}
 
@@ -59,7 +61,7 @@ func runNames(args []string) error {
 		}
 	}
 
-	if err := saveNameOverrides(*namesPath, overrides); err != nil {
+	if err := clipname.SaveOverrides(*namesPath, overrides); err != nil {
 		return err
 	}
 

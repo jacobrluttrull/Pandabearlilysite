@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 
+	"soundboard-api/internal/clipname"
 	"soundboard-api/internal/db/gen"
 )
 
@@ -15,13 +16,13 @@ import (
 // name actually differs are written, so a no-op run reports nothing changed.
 func runApplyNames(args []string) error {
 	fs := flag.NewFlagSet("apply-names", flag.ExitOnError)
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	dryRun := fs.Bool("dry-run", false, "show the renames without writing them")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
@@ -41,7 +42,7 @@ func runApplyNames(args []string) error {
 
 	var renamed, unchanged int
 	for _, sb := range soundbites {
-		want := nameFor(sb.Filename, overrides)
+		want := clipname.For(sb.Filename, overrides)
 		if want == sb.Name {
 			unchanged++
 			continue

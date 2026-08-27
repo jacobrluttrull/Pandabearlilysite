@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"os"
 	"sort"
+
+	"soundboard-api/internal/clipname"
 )
 
 // runCheck audits the three places a clip exists — the database, the audio dir, and the
@@ -15,7 +17,7 @@ import (
 // orphaned by a manual delete, and duplicate content that dedupe would collapse.
 func runCheck(args []string) error {
 	fs := flag.NewFlagSet("check", flag.ExitOnError)
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -33,7 +35,7 @@ func runCheck(args []string) error {
 		return fmt.Errorf("list soundbites: %w", err)
 	}
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}

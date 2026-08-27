@@ -10,6 +10,7 @@ import (
 	"path/filepath"
 
 	"soundboard-api/internal/audio"
+	"soundboard-api/internal/clipname"
 	"soundboard-api/internal/config"
 	sbdb "soundboard-api/internal/db"
 	"soundboard-api/internal/db/gen"
@@ -25,7 +26,7 @@ func runImport(args []string) error {
 	fs := flag.NewFlagSet("import", flag.ExitOnError)
 	dir := fs.String("dir", "", "folder of .mp3 clips to import (required)")
 	dryRun := fs.Bool("dry-run", false, "report what would be imported without copying files or writing to the database")
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file used to override derived labels")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file used to override derived labels")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -42,7 +43,7 @@ func runImport(args []string) error {
 		return fmt.Errorf("no .mp3 files found in %s", *dir)
 	}
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
@@ -160,7 +161,7 @@ func importClips(
 			copiedPaths = append(copiedPaths, destPath)
 		}
 
-		name := nameFor(filename, overrides)
+		name := clipname.For(filename, overrides)
 		_, err = queries.CreateSoundbiteIfNew(ctx, gen.CreateSoundbiteIfNewParams{
 			Name:          name,
 			Filename:      filename,
@@ -209,7 +210,7 @@ func reportDryRun(srcDir string, filenames []string, stored map[string]bool, ove
 		}
 
 		wouldAdd++
-		fmt.Printf("  add   %-40s %6.1fs  %s\n", filename, seconds, nameFor(filename, overrides))
+		fmt.Printf("  add   %-40s %6.1fs  %s\n", filename, seconds, clipname.For(filename, overrides))
 	}
 
 	fmt.Printf("\nwould add %d, would skip %d (already stored), unreadable %d\n",

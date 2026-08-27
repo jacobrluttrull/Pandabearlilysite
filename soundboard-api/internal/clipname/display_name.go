@@ -1,4 +1,5 @@
-package main
+// Package clipname derives and stores the labels shown for each soundbite.
+package clipname
 
 import (
 	"path/filepath"
@@ -6,7 +7,7 @@ import (
 	"unicode"
 )
 
-// displayName derives a clip's label from its filename, staying deliberately faithful to
+// DisplayName derives a clip's label from its filename, staying deliberately faithful to
 // the file so you can read a name on the grid and know which file it came from:
 //
 //	ads-in-our-ass.mp3   -> "ads in our ass"
@@ -20,8 +21,8 @@ import (
 //
 // Filenames written as one run-together word cannot be split by any reliable rule, so
 // they come through unchanged and are meant to be corrected in the names file. See
-// loadNameOverrides.
-func displayName(filename string) string {
+// LoadOverrides.
+func DisplayName(filename string) string {
 	base := strings.TrimSuffix(filename, filepath.Ext(filename))
 	base = splitSeparators(base)
 	base = splitCamelCase(base)

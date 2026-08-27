@@ -6,6 +6,7 @@ import (
 	"flag"
 	"fmt"
 
+	"soundboard-api/internal/clipname"
 	"soundboard-api/internal/db/gen"
 )
 
@@ -16,7 +17,7 @@ import (
 // file survives a later import.
 func runRename(args []string) error {
 	fs := flag.NewFlagSet("rename", flag.ExitOnError)
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -59,12 +60,12 @@ func runRename(args []string) error {
 		return fmt.Errorf("rename %s: %w", filename, err)
 	}
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
 	overrides[filename] = newName
-	if err := saveNameOverrides(*namesPath, overrides); err != nil {
+	if err := clipname.SaveOverrides(*namesPath, overrides); err != nil {
 		return err
 	}
 

@@ -1,0 +1,37 @@
+# Build context should carry source only — everything below is either rebuilt inside the
+# image, machine-specific, or would bloat the upload.
+
+.git
+.gitignore
+.mcp.json
+.idea
+.vscode
+.claude
+.agents
+
+# Local runtime state. The database belongs on the mounted volume, never in the image —
+# baking one in would ship stale play counts and shadow the volume's copy.
+soundboard-api/data/
+soundboard-api/bin/
+soundboard-api/go.work
+soundboard-api/go.work.sum
+
+# Working copies of the clips. The served collection is soundboard-api/clips/.
+Pandalily Soundbites/
+
+# Rebuilt inside the image.
+web/node_modules/
+web/build/
+web/.svelte-kit/
+web/.env
+web/.env.*
+
+# Not part of the running service.
+designs/
+info/
+README.md
+CLAUDE.md
+*.md
+!soundboard-api/README.md
+.playwright-mcp/
+.review/

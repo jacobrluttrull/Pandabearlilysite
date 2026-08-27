@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"sort"
 
+	"soundboard-api/internal/clipname"
 	"soundboard-api/internal/db/gen"
 )
 
@@ -19,7 +20,7 @@ import (
 // Content hashing is what actually catches them.
 func runDedupe(args []string) error {
 	fs := flag.NewFlagSet("dedupe", flag.ExitOnError)
-	namesPath := fs.String("names", defaultNamesPath, "path to the names file")
+	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
 	dryRun := fs.Bool("dry-run", false, "show the duplicate groups without removing anything")
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -48,7 +49,7 @@ func runDedupe(args []string) error {
 		return nil
 	}
 
-	overrides, err := loadNameOverrides(*namesPath)
+	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
 		return err
 	}
@@ -97,7 +98,7 @@ func runDedupe(args []string) error {
 	}
 
 	if !*dryRun && removed > 0 {
-		if err := saveNameOverrides(*namesPath, overrides); err != nil {
+		if err := clipname.SaveOverrides(*namesPath, overrides); err != nil {
 			return err
 		}
 	}
