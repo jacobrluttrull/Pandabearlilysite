@@ -8,7 +8,11 @@
 
 	// Same-origin in production; in dev, Vite proxies /api to the Go process. Keeping
 	// the path relative means there is no environment-specific URL to configure.
-	const baseUrl = '';
+	//
+	// This is the prefix for endpoints the client builds itself. audio_url and
+	// download_url are not among them: the API sends those already rooted at /api, so
+	// they are used verbatim rather than prefixed again.
+	const baseUrl = '/api';
 
 	type Status = 'loading' | 'error' | 'ready';
 
@@ -44,7 +48,7 @@
 
 	function play(clip: Soundbite) {
 		if (!audioEl) return;
-		audioEl.src = `${baseUrl}${clip.audio_url}`;
+		audioEl.src = clip.audio_url;
 		nowPlayingId = clip.id;
 		audioEl.play();
 		countPlay(clip);
@@ -171,7 +175,7 @@
 				</button>
 					<a
 						class="clip-download"
-						href={`${baseUrl}${clip.download_url}`}
+						href={clip.download_url}
 						download
 						title={`Download "${clip.name}"`}
 					>
