@@ -279,5 +279,10 @@ is state held on the server across requests rather than a lock on a file handle,
 not safe to assume — both paths were exercised against a real server before this note was
 written.
 
-Still unexercised: a Railway deploy. The container has never been built, because Docker is
-not installed on the development machine.
+The container image is built and verified too (2026-08-29): 54.6 MB, all six pages plus the
+404, all 56 clips, no `/data` directory. Running it confirmed migrations applying, seeding,
+the password prompt, audio streaming, `X-Robots-Tag`, and — with auth switched on — Docker's
+own `HEALTHCHECK` reporting `healthy`, which is what proves the `/api/health` exemption
+works where it matters.
+
+Still unexercised: an actual Railway deploy.
