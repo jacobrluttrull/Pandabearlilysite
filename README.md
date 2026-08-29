@@ -9,9 +9,9 @@ Private repo — not open to contributions.
 Monorepo with frontend and backend kept fully separate:
 
 - `web/` — [SvelteKit](https://kit.svelte.dev/), TypeScript, plain CSS (no Tailwind). Most pages prerendered/static.
-- `soundboard-api/` — Go API + SQLite (`modernc.org/sqlite`, no cgo) backing the soundboard page, plus a Go CLI for uploading new clips. The frontend fetches from this API client-side rather than at build time, since the clip list changes without a redeploy.
+- `soundboard-api/` — Go API + SQLite (`modernc.org/sqlite`, no cgo) backing the soundboard page, plus a Go CLI for uploading new clips. The frontend fetches from this API client-side rather than at build time, since the clip list changes without a redeploy. The database is moving to [Turso](https://turso.tech/) (managed libSQL — still SQLite dialect, so migrations and queries carry over); decided, not yet implemented.
 
-Deployment target is tentatively Cloudflare Pages (`adapter-cloudflare`) for the frontend — not finalized. Backend hosting, and where audio files themselves live (on-disk vs. Cloudflare R2), are also still open.
+Deployed as a single [Railway](https://railway.app/) service from one Docker image: the Go binary serves the API under `/api` *and* the prerendered SvelteKit site from the same process, so there is one origin and no CORS. Cloudflare Pages (`adapter-cloudflare`) was the earlier tentative plan and is no longer it. Where the clip audio itself lives (baked into the image vs. Cloudflare R2) is still open.
 
 ## Pages
 
@@ -36,4 +36,4 @@ In progress.
 ## Planned / undecided
 
 - Soundbite schema still needs tags/category and source/stream context, deferred until there are more real clips to design against.
-- Final deployment targets for the frontend and backend, and audio file storage location (on-disk next to the API vs. Cloudflare R2).
+- Audio file storage location — baked into the Docker image (current) vs. Cloudflare R2.
