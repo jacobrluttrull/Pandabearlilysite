@@ -1,16 +1,14 @@
 package main
 
 import (
-	"context"
 	"log"
 	"net/http"
 
 	"soundboard-api/internal/api"
-	"soundboard-api/internal/clipname"
+	"soundboard-api/internal/clipstore"
 	"soundboard-api/internal/config"
 	"soundboard-api/internal/db"
 	"soundboard-api/internal/db/gen"
-	"soundboard-api/internal/seed"
 )
 
 func main() {
@@ -41,25 +39,18 @@ func main() {
 
 	queries := gen.New(sqlDB)
 
-	// Clip audio ships in the image while the database lives on a volume, so a fresh
-	// volume — or a newly added clip — needs rows creating before anything can be
-	// served. Existing rows, including play counts, are left alone.
-	names, err := clipname.LoadOverrides(clipname.DefaultPath)
-	if err != nil {
-		log.Printf("seed: continuing without name overrides: %v", err)
-		names = map[string]string{}
+	// Clip audio lives in R2 in production and in a local folder during development.
+	// There is no seeding step any more: the CLI writes the audio and its database row
+	// together, so a row without its audio cannot arrive here in the first place.
+	if err := clipstore.RequireComplete(cfg.R2()); err != nil {
+		log.Fatalf("%v", err)
 	}
 
-	added, err := seed.Clips(context.Background(), queries, cfg.AudioDir, names)
-	if err != nil {
-		log.Fatalf("seed clips: %v", err)
-	}
-	if added > 0 {
-		log.Printf("seed: added %d clip(s) from %s", added, cfg.AudioDir)
-	}
+	clips := clipstore.Open(cfg.R2(), cfg.AudioDir)
+	log.Printf("clips: %s", clips.Describe())
 
 	handler := api.NewHandler(queries, api.Options{
-		AudioDir:      cfg.AudioDir,
+		Clips:         clips,
 		AllowedOrigin: cfg.AllowedOrigin,
 		StaticDir:     cfg.StaticDir,
 		AuthUser:      cfg.AuthUser,

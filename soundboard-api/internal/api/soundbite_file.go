@@ -4,8 +4,6 @@ import (
 	"database/sql"
 	"errors"
 	"net/http"
-	"os"
-	"path/filepath"
 	"strconv"
 
 	"soundboard-api/internal/db/gen"
@@ -14,13 +12,14 @@ import (
 // serveSoundbiteFile looks up a clip by the id in the request path and serves its audio.
 //
 // dispositionFor, when non-nil, is called with the looked-up clip to build the
-// Content-Disposition header. The audio route passes nil so browsers play the clip
-// inline; the download route returns an "attachment" disposition so the same bytes are
-// saved to disk instead. Passing a callback rather than a string keeps the lookup here,
-// so the download route does not have to query the clip a second time just to name it.
+// Content-Disposition value. The audio route passes nil so browsers play the clip inline;
+// the download route returns an "attachment" disposition so the same bytes are saved
+// instead. Passing a callback rather than a string keeps the lookup here, so the download
+// route does not query the clip a second time just to name it.
 //
-// http.ServeContent handles range requests, so seeking works and a partial download can
-// resume.
+// How the bytes actually reach the caller is the store's business: the local store
+// streams the file with range support, and the R2 store redirects to a presigned URL so
+// the audio never passes through this process at all.
 func (s *Server) serveSoundbiteFile(
 	w http.ResponseWriter,
 	r *http.Request,
@@ -42,24 +41,10 @@ func (s *Server) serveSoundbiteFile(
 		return
 	}
 
-	path := filepath.Join(s.audioDir, soundbite.Filename)
-
-	file, err := os.Open(path)
-	if err != nil {
-		writeError(w, http.StatusNotFound, "audio file not found")
-		return
-	}
-	defer file.Close()
-
-	info, err := file.Stat()
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "failed to read audio file")
-		return
-	}
-
+	var disposition string
 	if dispositionFor != nil {
-		w.Header().Set("Content-Disposition", dispositionFor(soundbite))
+		disposition = dispositionFor(soundbite)
 	}
 
-	http.ServeContent(w, r, soundbite.Filename, info.ModTime(), file)
+	s.clips.Serve(w, r, soundbite.Filename, disposition)
 }

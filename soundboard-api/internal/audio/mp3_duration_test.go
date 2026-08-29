@@ -100,7 +100,7 @@ func TestMP3DurationToleratesTruncatedFinalFrame(t *testing.T) {
 	}
 
 	// The four intact frames must still be measured.
-	want := float64((frameCount - 1) * samplesPerFrame) / testFileSampleRate
+	want := float64((frameCount-1)*samplesPerFrame) / testFileSampleRate
 	if math.Abs(got-want) > 0.001 {
 		t.Errorf("got %.4fs, want %.4fs", got, want)
 	}

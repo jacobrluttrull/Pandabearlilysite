@@ -76,6 +76,7 @@ go run .\cmd\cli reset-plays -all
 | `dedupe` | Find byte-identical clips, keep one, merge its copies' play counts. |
 | `remove <file>...` | Delete clips — row, audio file, and `names.json` entry. |
 | `reset-plays -all` | Zero play tallies. Or pass filenames to reset just those. |
+| `sync-clips` | Upload local clips the store does not have yet. Only ever adds. |
 | `check` | Audit database vs. audio files vs. `names.json` for drift. |
 | `list` | Show every stored clip with length, plays, and date. |
 
@@ -87,8 +88,9 @@ Most commands take `-dry-run`. All take `-h`.
   which is gitignored. In production it is a Turso database instead — see
   [Connecting to Turso](#connecting-to-turso). Same table either way; only the DSN
   changes.
-- **Audio**: `clips/`, copied in from wherever you staged it. **Committed** — it ships
-  inside the Docker image, and it is the only backup of the audio that exists.
+- **Audio**: `clips/` on your machine, and a **Cloudflare R2 bucket** in production — see
+  [Clip audio and R2](#clip-audio-and-r2). The local folder is your working copy and is
+  **not committed**; R2 holds the published collection.
 - **Labels**: `names.json`, a `filename -> display name` map. **Committed** — it is
   hand-written content, and losing it means retyping every label.
 
@@ -125,13 +127,17 @@ go run .\cmd\api        # listens on :8080
 | `SOUNDBOARD_DB_PATH` | `data/soundboard.db` | Local SQLite file. Used only when `TURSO_DATABASE_URL` is empty. |
 | `TURSO_DATABASE_URL` | *(empty)* | Remote libSQL database, e.g. `libsql://soundboard-you.turso.io`. Set it and `SOUNDBOARD_DB_PATH` is ignored. |
 | `TURSO_AUTH_TOKEN` | *(empty)* | Credential for `TURSO_DATABASE_URL`. Never logged. |
-| `SOUNDBOARD_AUDIO_DIR` | `clips` | Where clip audio lives |
 | `SOUNDBOARD_ADDR` | `:8080` | Listen address. Ignored when `PORT` is set. |
 | `PORT` | *(empty)* | Takes precedence over `SOUNDBOARD_ADDR`. Railway injects this and health-checks the port it assigned, so the service must honour it. |
 | `SOUNDBOARD_ALLOWED_ORIGIN` | *(empty)* | `Access-Control-Allow-Origin`. Empty sends no CORS headers, which is correct while the API and the site share one origin. |
 | `SOUNDBOARD_STATIC_DIR` | *(empty)* | Built frontend to serve alongside the API. Empty serves the API alone. |
 | `SOUNDBOARD_AUTH_PASSWORD` | *(empty)* | Password for the whole site. **Empty disables the prompt entirely** — fine locally, never in a deployment. |
 | `SOUNDBOARD_AUTH_USER` | `panda` | Username shown alongside the password prompt. |
+| `R2_ACCOUNT_ID` | *(empty)* | Cloudflare account id — forms the R2 endpoint. |
+| `R2_ACCESS_KEY_ID` | *(empty)* | R2 API token key. |
+| `R2_SECRET_ACCESS_KEY` | *(empty)* | R2 API token secret. |
+| `R2_BUCKET` | *(empty)* | Bucket holding the clips. |
+| `SOUNDBOARD_AUDIO_DIR` | `clips` | Local clip folder. Used when the R2 variables are unset. |
 
 The two `TURSO_*` names are Turso's own spelling, so the values copy straight out of its
 dashboard or CLI without renaming. Both are unset by default, which is what keeps a fresh
@@ -153,6 +159,66 @@ itself is never modified — both routes stream the same bytes off disk.
 The frontend needs no environment variables. It calls `/api` on its own origin — served
 by this binary in production, proxied to `localhost:8080` by Vite in development (see
 `web/vite.config.ts`). There is no API URL to configure in either case.
+
+## Clip audio and R2
+
+Clip MP3s are files, not database rows — Turso holds the metadata and play counts, and
+never the audio. Where the bytes live is a separate choice, and there are two stores:
+
+| When | Store | How a clip reaches the browser |
+| --- | --- | --- |
+| R2 variables set | Cloudflare R2 bucket | A redirect to a short-lived presigned URL |
+| otherwise | `clips/` on disk | Streamed from the file, with range support |
+
+The API says which one it picked at boot, next to the database and auth lines:
+
+```
+clips: Cloudflare R2 bucket pandalily-clips
+clips: local directory clips
+```
+
+**Why a redirect, not a proxy.** Audio is the only bandwidth-heavy thing this site serves.
+Streaming it through the Go process would put every byte back through the container that
+object storage exists to keep it out of. The redirect means the bytes go straight from
+Cloudflare to the visitor.
+
+**Why presigned rather than a public bucket.** The site is password-protected. A public
+bucket would serve the audio to anyone holding a URL, straight past that password. A
+presigned URL is minted per request and expires in 15 minutes, so the audio stays as
+private as the pages are.
+
+**The download filename survives the redirect.** `/download` names the saved file after the
+clip's display name, and a redirect discards any header this server sets. The disposition
+is therefore signed into the URL as `response-content-disposition`, so you still save
+`ass-eaten-by-these-bitches.mp3` rather than `asseatenbythesebitches.mp3`.
+
+### Publishing clips
+
+`upload` and `import` write the audio and its database row together, so a row can never
+point at audio that was never stored. `remove` deletes both. To push local files that are
+not in the store yet — the initial migration, or repair after a failed upload:
+
+```powershell
+$env:R2_ACCOUNT_ID        = "<account id>"
+$env:R2_ACCESS_KEY_ID     = "<access key id>"
+$env:R2_SECRET_ACCESS_KEY = "<secret>"
+$env:R2_BUCKET            = "pandalily-clips"
+
+go run .\cmd\cli sync-clips -dry-run
+go run .\cmd\cli sync-clips
+```
+
+`sync-clips` only ever adds. A clip in the bucket but missing locally is left alone,
+because the bucket is the published collection and your folder is not authoritative over
+it.
+
+Set all four R2 variables or none. A partial config is refused at startup rather than
+falling back to local files that do not exist in production.
+
+**There is no boot-time seeding any more.** The API used to create a row for any clip file
+without one, because audio shipped in the image while the database lived on a volume.
+Neither half of that is true now — the CLI writes audio and row together, so the gap it
+closed cannot open.
 
 ## Keeping it private
 

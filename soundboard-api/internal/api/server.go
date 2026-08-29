@@ -3,19 +3,20 @@ package api
 import (
 	"net/http"
 
+	"soundboard-api/internal/clipstore"
 	"soundboard-api/internal/db/gen"
 )
 
 // Server holds the dependencies needed by route handlers.
 type Server struct {
-	queries  *gen.Queries
-	audioDir string
+	queries *gen.Queries
+	clips   clipstore.Store
 }
 
 // Options configures the HTTP handler.
 type Options struct {
-	// AudioDir is where clip audio is read from.
-	AudioDir string
+	// Clips is where clip audio comes from — a local directory or an R2 bucket.
+	Clips clipstore.Store
 	// AllowedOrigin sets Access-Control-Allow-Origin. Empty omits CORS headers, which
 	// is right when the frontend is served by this same process.
 	AllowedOrigin string
@@ -33,8 +34,8 @@ type Options struct {
 // everything else falls through to the static frontend when one is configured.
 func NewHandler(queries *gen.Queries, opts Options) http.Handler {
 	s := &Server{
-		queries:  queries,
-		audioDir: opts.AudioDir,
+		queries: queries,
+		clips:   opts.Clips,
 	}
 
 	mux := http.NewServeMux()

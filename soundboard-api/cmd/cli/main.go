@@ -22,6 +22,7 @@ var commands = []struct {
 	{"dedupe", "find and merge byte-identical duplicate clips", runDedupe},
 	{"remove", "delete clips by filename", runRemove},
 	{"reset-plays", "zero play tallies (-all, or by filename)", runResetPlays},
+	{"sync-clips", "upload local clips the store does not have yet", runSyncClips},
 	{"check", "audit database, audio files, and names for drift", runCheck},
 	{"list", "show all stored soundbites", runList},
 }

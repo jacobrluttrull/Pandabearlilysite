@@ -11,7 +11,6 @@ import (
 
 	"soundboard-api/internal/audio"
 	"soundboard-api/internal/clipname"
-	"soundboard-api/internal/config"
 	"soundboard-api/internal/db/gen"
 )
 
@@ -56,8 +55,6 @@ func runImport(args []string) error {
 	}
 	defer st.Close()
 
-	sqlDB, cfg := st.db, st.cfg
-
 	ctx := context.Background()
 
 	stored, err := storedFilenames(ctx, st.queries)
@@ -69,13 +66,9 @@ func runImport(args []string) error {
 		return reportDryRun(*dir, filenames, stored, overrides)
 	}
 
-	if err := os.MkdirAll(cfg.AudioDir, 0o755); err != nil {
-		return fmt.Errorf("create audio dir: %w", err)
-	}
-
 	fmt.Printf("importing %d mp3 file(s) from %s\n\n", len(filenames), *dir)
 
-	result, err := importClips(ctx, sqlDB, cfg, *dir, filenames, stored, overrides)
+	result, err := importClips(ctx, st, *dir, filenames, stored, overrides)
 	if err != nil {
 		return err
 	}
@@ -104,12 +97,11 @@ type importFailure struct {
 // Audio files are copied as clips are processed, but a clip that fails to measure or
 // insert does not abort the batch — the failure is collected and the run continues, so
 // one bad file out of hundreds does not cost you the whole import. If the transaction
-// itself cannot commit, files copied during this run are removed again so the audio dir
-// does not drift out of sync with the database.
+// itself cannot commit, audio published during this run is removed again so the clip
+// store does not drift out of sync with the database.
 func importClips(
 	ctx context.Context,
-	sqlDB *sql.DB,
-	cfg config.Config,
+	st *store,
 	srcDir string,
 	filenames []string,
 	stored map[string]bool,
@@ -117,18 +109,23 @@ func importClips(
 ) (importResult, error) {
 	var result importResult
 
-	tx, err := sqlDB.BeginTx(ctx, nil)
+	tx, err := st.db.BeginTx(ctx, nil)
 	if err != nil {
 		return result, fmt.Errorf("begin transaction: %w", err)
 	}
 	defer tx.Rollback()
 
-	queries := gen.New(sqlDB).WithTx(tx)
+	queries := gen.New(st.db).WithTx(tx)
 
-	var copiedPaths []string
+	// Audio published so far this run. If the transaction rolls back, these are removed
+	// again so a failed import does not leave clips in the store with no row pointing at
+	// them — invisible on the site, but occupying the filename a later retry needs.
+	var published []string
 	cleanupCopies := func() {
-		for _, path := range copiedPaths {
-			os.Remove(path)
+		for _, filename := range published {
+			if err := st.clips.Delete(ctx, filename); err != nil {
+				fmt.Fprintf(os.Stderr, "warning: could not remove %s after rollback: %v\n", filename, err)
+			}
 		}
 	}
 
@@ -148,16 +145,12 @@ func importClips(
 			continue
 		}
 
-		destPath := filepath.Join(cfg.AudioDir, filename)
-		copied, err := copyFileIfMissing(srcPath, destPath)
-		if err != nil {
+		if err := publishClip(ctx, st, srcPath, filename); err != nil {
 			result.failures = append(result.failures, importFailure{filename, err})
 			fmt.Printf("  FAIL  %-40s %v\n", filename, err)
 			continue
 		}
-		if copied {
-			copiedPaths = append(copiedPaths, destPath)
-		}
+		published = append(published, filename)
 
 		name := clipname.For(filename, overrides)
 		_, err = queries.CreateSoundbiteIfNew(ctx, gen.CreateSoundbiteIfNewParams{

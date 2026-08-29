@@ -25,6 +25,14 @@ type Config struct {
 	AuthToken string
 	// AuthUser is the username for the site's password prompt.
 	AuthUser string
+	// R2AccountID, R2AccessKeyID, R2SecretAccessKey and R2Bucket address the Cloudflare
+	// R2 bucket holding clip audio. All four must be set to use it; any missing and the
+	// clips are read from AudioDir on disk instead, which is what local development
+	// wants. The secret key is a credential — never log it.
+	R2AccountID       string
+	R2AccessKeyID     string
+	R2SecretAccessKey string
+	R2Bucket          string
 	// AuthPassword gates the whole site. Empty disables the prompt entirely, which is
 	// what local development wants; any deployment must set it, because this is a fan
 	// site published without its subject's endorsement and is not meant to be public.
@@ -53,6 +61,12 @@ func Load() Config {
 		// no password at all. Unset means the prompt is off, and the API says so at boot.
 		AuthUser:     envOr("SOUNDBOARD_AUTH_USER", "panda"),
 		AuthPassword: envOr("SOUNDBOARD_AUTH_PASSWORD", ""),
+		// Unset by default so a checkout with no Cloudflare account still serves clips
+		// from disk. Named as Cloudflare names them, so values can be pasted across.
+		R2AccountID:       envOr("R2_ACCOUNT_ID", ""),
+		R2AccessKeyID:     envOr("R2_ACCESS_KEY_ID", ""),
+		R2SecretAccessKey: envOr("R2_SECRET_ACCESS_KEY", ""),
+		R2Bucket:          envOr("R2_BUCKET", ""),
 	}
 }
 

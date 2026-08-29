@@ -56,12 +56,7 @@ func runUpload(args []string) error {
 	}
 	defer st.Close()
 
-	if err := os.MkdirAll(st.cfg.AudioDir, 0o755); err != nil {
-		return fmt.Errorf("create audio dir: %w", err)
-	}
-
 	filename := filepath.Base(*file)
-	destPath := filepath.Join(st.cfg.AudioDir, filename)
 
 	overrides, err := clipname.LoadOverrides(*namesPath)
 	if err != nil {
@@ -73,12 +68,14 @@ func runUpload(args []string) error {
 		label = clipname.For(filename, overrides)
 	}
 
-	copied, err := copyFileIfMissing(*file, destPath)
-	if err != nil {
-		return fmt.Errorf("copy audio file: %w", err)
+	// Audio first, row second. A stored clip with no row is invisible and harmless; a
+	// row with no audio is a tile on the site that 404s when clicked.
+	ctx := context.Background()
+	if err := publishClip(ctx, st, *file, filename); err != nil {
+		return err
 	}
 
-	created, err := st.queries.CreateSoundbiteIfNew(context.Background(), gen.CreateSoundbiteIfNewParams{
+	created, err := st.queries.CreateSoundbiteIfNew(ctx, gen.CreateSoundbiteIfNewParams{
 		Name:          label,
 		Filename:      filename,
 		DateMade:      sql.NullString{String: *dateMade, Valid: *dateMade != ""},
@@ -88,8 +85,9 @@ func runUpload(args []string) error {
 		return fmt.Errorf("%s is already stored — use `cli rename` to relabel it", filename)
 	}
 	if err != nil {
-		if copied {
-			os.Remove(destPath)
+		// Roll the audio back so a failed add leaves nothing behind.
+		if delErr := st.clips.Delete(ctx, filename); delErr != nil {
+			fmt.Fprintf(os.Stderr, "warning: could not remove orphaned audio %s: %v\n", filename, delErr)
 		}
 		return fmt.Errorf("save soundbite: %w", err)
 	}

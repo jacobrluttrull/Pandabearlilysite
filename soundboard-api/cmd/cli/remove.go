@@ -6,7 +6,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"soundboard-api/internal/clipname"
 )
@@ -61,9 +60,8 @@ func runRemove(args []string) error {
 			continue
 		}
 
-		audioPath := filepath.Join(st.cfg.AudioDir, filename)
-		if err := os.Remove(audioPath); err != nil && !os.IsNotExist(err) {
-			return fmt.Errorf("delete audio %s: %w", audioPath, err)
+		if err := st.clips.Delete(context.Background(), filename); err != nil {
+			return fmt.Errorf("delete audio %s: %w", filename, err)
 		}
 
 		delete(overrides, filename)

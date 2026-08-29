@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	"soundboard-api/internal/clipstore"
 	"soundboard-api/internal/config"
 	sbdb "soundboard-api/internal/db"
 	"soundboard-api/internal/db/gen"
@@ -15,6 +16,11 @@ type store struct {
 	db      *sql.DB
 	queries *gen.Queries
 	cfg     config.Config
+	// clips is where audio is published to. Commands still read and hash the local
+	// files directly — that is where the source of truth for a new clip is — but
+	// anything that changes the stored collection goes through here, so the same
+	// command works whether it is writing to a folder or to R2.
+	clips clipstore.Manager
 }
 
 // openStore loads config, opens the database, and brings it up to the latest schema.
@@ -43,7 +49,18 @@ func openStore() (*store, error) {
 		return nil, fmt.Errorf("run migrations: %w", err)
 	}
 
-	return &store{db: sqlDB, queries: gen.New(sqlDB), cfg: cfg}, nil
+	if err := clipstore.RequireComplete(cfg.R2()); err != nil {
+		sqlDB.Close()
+		return nil, err
+	}
+
+	clips, ok := clipstore.Open(cfg.R2(), cfg.AudioDir).(clipstore.Manager)
+	if !ok {
+		sqlDB.Close()
+		return nil, fmt.Errorf("clip store is read-only, cannot manage clips")
+	}
+
+	return &store{db: sqlDB, queries: gen.New(sqlDB), cfg: cfg, clips: clips}, nil
 }
 
 func (s *store) Close() error {
