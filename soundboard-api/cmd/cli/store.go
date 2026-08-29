@@ -24,7 +24,16 @@ type store struct {
 func openStore() (*store, error) {
 	cfg := config.Load()
 
-	sqlDB, err := sbdb.Open(cfg.DBPath)
+	// TURSO_DATABASE_URL being set states an intent to use a remote database. If the
+	// value is malformed it would otherwise be taken as a filesystem path and the
+	// service would start quietly on a local file that no deploy survives.
+	if cfg.DatabaseURL != "" {
+		if err := sbdb.RequireRemote(cfg.DatabaseDSN()); err != nil {
+			return nil, err
+		}
+	}
+
+	sqlDB, err := sbdb.Open(cfg.DatabaseDSN())
 	if err != nil {
 		return nil, fmt.Errorf("open database: %w", err)
 	}

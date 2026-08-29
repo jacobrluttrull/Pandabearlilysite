@@ -16,20 +16,43 @@ type Config struct {
 	AllowedOrigin string
 	// StaticDir is the folder holding the built frontend. Empty serves the API alone.
 	StaticDir string
+	// DatabaseURL points at a hosted libSQL database, e.g. "libsql://soundboard-user.turso.io".
+	// Empty means there is no remote to talk to and DBPath is used instead, which keeps
+	// local development a zero-setup affair: clone, run, get a file on disk.
+	DatabaseURL string
+	// AuthToken authenticates against DatabaseURL. It is a credential, so it must never
+	// be logged, printed, or embedded in an error message — only handed to the driver.
+	AuthToken string
+	// AuthUser is the username for the site's password prompt.
+	AuthUser string
+	// AuthPassword gates the whole site. Empty disables the prompt entirely, which is
+	// what local development wants; any deployment must set it, because this is a fan
+	// site published without its subject's endorsement and is not meant to be public.
+	// A credential — never log it.
+	AuthPassword string
 }
 
 // Load reads configuration from environment variables, applying local-dev defaults
 // for anything unset.
 func Load() Config {
 	return Config{
-		DBPath:        envOr("SOUNDBOARD_DB_PATH", "data/soundboard.db"),
-		AudioDir:      envOr("SOUNDBOARD_AUDIO_DIR", "clips"),
-		Addr:          listenAddr(),
+		DBPath:   envOr("SOUNDBOARD_DB_PATH", "data/soundboard.db"),
+		AudioDir: envOr("SOUNDBOARD_AUDIO_DIR", "clips"),
+		Addr:     listenAddr(),
 		// Defaults to no CORS headers at all: the site is served by this same process,
 		// so nothing is cross-origin. Set it explicitly only when the frontend is
 		// hosted somewhere else.
 		AllowedOrigin: envOr("SOUNDBOARD_ALLOWED_ORIGIN", ""),
 		StaticDir:     envOr("SOUNDBOARD_STATIC_DIR", ""),
+		// Both Turso values are unset by default so an untouched checkout runs against a
+		// local file. Turso names these variables itself, so keeping its spelling means
+		// the values can be copied straight out of its dashboard or CLI without renaming.
+		DatabaseURL: envOr("TURSO_DATABASE_URL", ""),
+		AuthToken:   envOr("TURSO_AUTH_TOKEN", ""),
+		// No default password: a fallback here would be a published password, which is
+		// no password at all. Unset means the prompt is off, and the API says so at boot.
+		AuthUser:     envOr("SOUNDBOARD_AUTH_USER", "panda"),
+		AuthPassword: envOr("SOUNDBOARD_AUTH_PASSWORD", ""),
 	}
 }
 

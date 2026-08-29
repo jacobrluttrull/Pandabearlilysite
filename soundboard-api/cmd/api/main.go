@@ -16,7 +16,20 @@ import (
 func main() {
 	cfg := config.Load()
 
-	sqlDB, err := db.Open(cfg.DBPath)
+	// Logged before the connection is attempted, so a misconfigured deploy says which
+	// database it fell back to even when opening it then fails.
+	log.Printf("database: %s", cfg.DatabaseDescription())
+
+	// TURSO_DATABASE_URL being set states an intent to use a remote database. If the
+	// value is malformed it would otherwise be taken as a filesystem path and the
+	// service would start quietly on a local file that no deploy survives.
+	if cfg.DatabaseURL != "" {
+		if err := db.RequireRemote(cfg.DatabaseDSN()); err != nil {
+			log.Fatalf("%v", err)
+		}
+	}
+
+	sqlDB, err := db.Open(cfg.DatabaseDSN())
 	if err != nil {
 		log.Fatalf("open database: %v", err)
 	}
@@ -49,7 +62,17 @@ func main() {
 		AudioDir:      cfg.AudioDir,
 		AllowedOrigin: cfg.AllowedOrigin,
 		StaticDir:     cfg.StaticDir,
+		AuthUser:      cfg.AuthUser,
+		AuthPassword:  cfg.AuthPassword,
 	})
+
+	// Stated at boot for the same reason the database is: the unprotected mode is the
+	// silent one, and this site is not meant to be reachable without a password.
+	if cfg.AuthPassword == "" {
+		log.Printf("auth: DISABLED — every visitor gets in. Set SOUNDBOARD_AUTH_PASSWORD before deploying.")
+	} else {
+		log.Printf("auth: password required (user %q)", cfg.AuthUser)
+	}
 
 	if cfg.StaticDir != "" {
 		log.Printf("serving frontend from %s", cfg.StaticDir)

@@ -9,8 +9,9 @@
 .claude
 .agents
 
-# Local runtime state. The database belongs on the mounted volume, never in the image —
-# baking one in would ship stale play counts and shadow the volume's copy.
+# Local runtime state. soundboard-api/data/ holds the SQLite file used for local
+# development only; production reads and writes Turso over the network, so a database in
+# the image would never be the real one — just stale play counts shipped to production.
 soundboard-api/data/
 soundboard-api/bin/
 soundboard-api/go.work

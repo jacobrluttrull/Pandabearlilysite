@@ -22,15 +22,18 @@ RUN go mod download
 
 COPY soundboard-api/ ./
 
-# CGO_ENABLED=0 gives a fully static binary. It works because the SQLite driver is
-# modernc.org/sqlite, which is pure Go — swapping to mattn/go-sqlite3 would need a C
-# toolchain here and a libc in the final stage.
+# CGO_ENABLED=0 gives a fully static binary. It works because both database drivers the
+# binary registers are pure Go — libsql-client-go for Turso, modernc.org/sqlite for the
+# local file used in development. A cgo-backed driver (go-libsql, mattn/go-sqlite3) would
+# need a C toolchain here and a matching libc in the final stage.
 RUN CGO_ENABLED=0 GOOS=linux go build -ldflags="-s -w" -o /out/api ./cmd/api
 
 # --- runtime ------------------------------------------------------------------------
 FROM alpine:3.22
 
-# Certificates for any outbound HTTPS, and a non-root user to run as.
+# ca-certificates is load-bearing, not a convenience: every query travels to Turso over
+# HTTPS, so without a CA bundle the TLS handshake fails and the app has no database at
+# all. wget is only here for the healthcheck below. Plus a non-root user to run as.
 RUN apk add --no-cache ca-certificates wget \
 	&& adduser -D -u 10001 soundboard
 
@@ -41,18 +44,14 @@ COPY --from=web   /web/build      /app/web
 COPY soundboard-api/clips          /app/clips
 COPY soundboard-api/names.json     /app/names.json
 
-# The database is the only state that has to outlive a deploy, so it lives on a mounted
-# volume. Clip audio ships in the image instead: it is read-only at runtime, and shipping
-# it means adding a soundbite is a commit rather than a manual step against production.
-ENV SOUNDBOARD_DB_PATH=/data/soundboard.db \
-	SOUNDBOARD_AUDIO_DIR=/app/clips \
+# The container holds no persistent state. The database is a network service (Turso),
+# reached with TURSO_DATABASE_URL and TURSO_AUTH_TOKEN supplied by the environment, so
+# nothing here has to outlive a deploy and no volume needs mounting. Clip audio ships in
+# the image because it is read-only at runtime, and shipping it means adding a soundbite
+# is a commit rather than a manual step against production.
+ENV SOUNDBOARD_AUDIO_DIR=/app/clips \
 	SOUNDBOARD_STATIC_DIR=/app/web \
 	PORT=8080
-
-# Created so the image runs even without a volume attached — though anything written
-# there is lost on redeploy, so production must mount one.
-RUN mkdir -p /data && chown soundboard:soundboard /data
-VOLUME ["/data"]
 
 USER soundboard
 EXPOSE 8080

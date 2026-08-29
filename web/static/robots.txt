@@ -1,3 +1,5 @@
-# allow crawling everything by default
+# This is an unofficial fan site, published without its subject's endorsement, and it is
+# not meant to be found by search. The Go server also sends "X-Robots-Tag: noindex" with
+# every response, because robots.txt is only a request and is not part of the response.
 User-agent: *
-Disallow:
+Disallow: /

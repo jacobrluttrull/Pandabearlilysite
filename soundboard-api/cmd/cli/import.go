@@ -12,7 +12,6 @@ import (
 	"soundboard-api/internal/audio"
 	"soundboard-api/internal/clipname"
 	"soundboard-api/internal/config"
-	sbdb "soundboard-api/internal/db"
 	"soundboard-api/internal/db/gen"
 )
 
@@ -48,21 +47,20 @@ func runImport(args []string) error {
 		return err
 	}
 
-	cfg := config.Load()
-
-	sqlDB, err := sbdb.Open(cfg.DBPath)
+	// Routed through openStore rather than opening the database here: that is the one
+	// place that resolves which database to talk to, and a second hand-rolled open had
+	// already drifted out of step with it.
+	st, err := openStore()
 	if err != nil {
-		return fmt.Errorf("open database: %w", err)
+		return err
 	}
-	defer sqlDB.Close()
+	defer st.Close()
 
-	if err := sbdb.Migrate(sqlDB); err != nil {
-		return fmt.Errorf("run migrations: %w", err)
-	}
+	sqlDB, cfg := st.db, st.cfg
 
 	ctx := context.Background()
 
-	stored, err := storedFilenames(ctx, gen.New(sqlDB))
+	stored, err := storedFilenames(ctx, st.queries)
 	if err != nil {
 		return err
 	}

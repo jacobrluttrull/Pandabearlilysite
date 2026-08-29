@@ -21,6 +21,10 @@ type Options struct {
 	AllowedOrigin string
 	// StaticDir is the built frontend to serve. Empty serves the API alone.
 	StaticDir string
+	// AuthUser and AuthPassword gate the whole site behind a password prompt. An empty
+	// password disables the prompt.
+	AuthUser     string
+	AuthPassword string
 }
 
 // NewHandler builds the full HTTP handler for the soundboard.
@@ -44,7 +48,10 @@ func NewHandler(queries *gen.Queries, opts Options) http.Handler {
 		mux.Handle("/", staticHandler(opts.StaticDir))
 	}
 
-	return withCORS(opts.AllowedOrigin, mux)
+	// Outermost first: the no-index header travels with every response including a 401,
+	// and the password check runs before anything routes, so an unauthenticated request
+	// never reaches a handler or the database.
+	return withNoIndex(withBasicAuth(opts.AuthUser, opts.AuthPassword, withCORS(opts.AllowedOrigin, mux)))
 }
 
 // handleHealth reports that the process is up. Platform health checks hit this rather

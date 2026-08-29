@@ -5,6 +5,9 @@
 <footer class="site-footer">
 	<PawPrint size={12} class="footer-paw" />
 	<p>PandaLily — Spirit Guardian of the Bamboo Forest</p>
+	<p class="disclaimer">
+		Unofficial fan site — made by a viewer, not affiliated with or endorsed by PandaLily.
+	</p>
 </footer>
 
 <style>
@@ -27,5 +30,14 @@
 
 	.site-footer p {
 		margin: 0;
+	}
+
+	/* Quieter than the tagline above it: this has to be unmissable if you look for it,
+	   without competing with the site's own content for attention. */
+	.disclaimer {
+		max-width: 34rem;
+		font-size: 0.75rem;
+		opacity: 0.75;
+		line-height: 1.5;
 	}
 </style>
