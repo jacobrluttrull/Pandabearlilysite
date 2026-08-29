@@ -5,6 +5,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strconv"
 	"testing"
 )
 
@@ -73,6 +74,22 @@ func TestStaticHandlerUnknownPathServes404Page(t *testing.T) {
 	}
 	if !contains(rec.Body.String(), "not found") {
 		t.Errorf("body = %q, want the site's 404 page", rec.Body.String())
+	}
+}
+
+// The 404 page used to go out through http.ServeFile after the status had already been
+// written, so ServeFile's headers were set too late to be sent and Go logged a
+// superfluous WriteHeader call on every miss. The status was right either way, which is
+// why this asserts the headers instead — they are what the bug actually cost.
+func TestStaticHandler404PageSendsItsHeaders(t *testing.T) {
+	h := staticHandler(buildDir(t))
+
+	rec := get(t, h, "/no-such-page")
+	if got := rec.Header().Get("Content-Type"); got != "text/html; charset=utf-8" {
+		t.Errorf("Content-Type = %q, want text/html; charset=utf-8", got)
+	}
+	if got, want := rec.Header().Get("Content-Length"), strconv.Itoa(rec.Body.Len()); got != want {
+		t.Errorf("Content-Length = %q, want %q", got, want)
 	}
 }
 

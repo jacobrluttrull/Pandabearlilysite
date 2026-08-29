@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"strconv"
 	"strings"
 )
 
@@ -47,10 +48,21 @@ func staticHandler(dir string) http.Handler {
 		}
 
 		// Unknown path: the site's own 404 page, with the right status code.
+		//
+		// Written out directly rather than with http.ServeFile, which always sends 200
+		// and has no way to be told otherwise. Pairing it with an earlier WriteHeader(404)
+		// does produce a 404 — the first status written wins — but ServeFile then tries to
+		// write its own, which Go reports as "superfluous response.WriteHeader call" on
+		// every miss, and the Content-Type and Content-Length it sets arrive too late to
+		// be sent at all.
 		if path, ok := existingFile(root, "404.html"); ok {
-			w.WriteHeader(http.StatusNotFound)
-			http.ServeFile(w, r, path)
-			return
+			if page, err := os.ReadFile(path); err == nil {
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.Header().Set("Content-Length", strconv.Itoa(len(page)))
+				w.WriteHeader(http.StatusNotFound)
+				w.Write(page)
+				return
+			}
 		}
 		http.NotFound(w, r)
 	})
