@@ -2,8 +2,6 @@
 
 A fan site for the VTuber PandaLily, replacing her [carrd page](https://pandabearlily.carrd.co/) — which reads poorly on mobile, buries the character references, and has no room for anything interactive.
 
-Private repo — not open to contributions.
-
 ## What it does
 
 Six pages, all served from one process:
