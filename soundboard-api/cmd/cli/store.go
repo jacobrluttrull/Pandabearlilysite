@@ -37,6 +37,8 @@ func openStore() (*store, error) {
 		if err := sbdb.RequireRemote(cfg.DatabaseDSN()); err != nil {
 			return nil, err
 		}
+	} else if err := sbdb.EnsureLocalDir(cfg.DBPath); err != nil {
+		return nil, err
 	}
 
 	sqlDB, err := sbdb.Open(cfg.DatabaseDSN())

@@ -25,6 +25,11 @@ func main() {
 		if err := db.RequireRemote(cfg.DatabaseDSN()); err != nil {
 			log.Fatalf("%v", err)
 		}
+	} else if err := db.EnsureLocalDir(cfg.DBPath); err != nil {
+		// No TURSO_DATABASE_URL at all. Locally that is the normal case and this just
+		// creates data/ on first run; in a deployment it is the missing variable, and
+		// the error says so rather than surfacing a bare SQLite errno.
+		log.Fatalf("%v", err)
 	}
 
 	sqlDB, err := db.Open(cfg.DatabaseDSN())
