@@ -145,16 +145,22 @@ checkout zero-setup: clone, `go run .\cmd\api`, get a file on disk.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /soundbites` | List every clip as JSON |
-| `GET /soundbites/{id}/audio` | Stream a clip for playback (supports range requests) |
-| `GET /soundbites/{id}/download` | Same bytes, sent as a file to save |
-| `POST /soundbites/{id}/play` | Record one play, returns the new total |
+| `GET /api/soundbites` | List every clip as JSON |
+| `GET /api/soundbites/{id}/audio` | Stream a clip for playback (supports range requests) |
+| `GET /api/soundbites/{id}/download` | Same bytes, sent as a file to save |
+| `POST /api/soundbites/{id}/play` | Record one play, returns the new total |
+| `GET /api/health` | Liveness probe. The one route the password does not cover. |
 
-`/download` exists as its own route because the HTML `download` attribute is ignored
-cross-origin, and the site is served from a different origin than this API. It sends
+Everything lives under `/api` so a route here can never collide with a page as the site
+grows; any other path falls through to the static frontend when one is configured.
+
+`/download` exists as its own route rather than an HTML `download` attribute on the play
+link, because that attribute is ignored on a cross-origin URL — and with R2 in play the
+audio *is* cross-origin, since the browser is redirected to the bucket. The route sends
 `Content-Disposition: attachment` with a hyphenated form of the clip's display name, so a
 visitor saves `ass-eaten-by-these-bitches.mp3` rather than the storage filename. The audio
-itself is never modified — both routes stream the same bytes off disk.
+itself is never modified — both routes serve the same bytes, streamed from disk locally
+and fetched straight from R2 in production.
 
 The frontend needs no environment variables. It calls `/api` on its own origin — served
 by this binary in production, proxied to `localhost:8080` by Vite in development (see
@@ -297,7 +303,8 @@ without credentials. It ships only in the Turso CLI, and that CLI has no native 
 build — its install docs require WSL. Installing WSL just for this is not worth it.
 
 Use a throwaway Turso database instead. The free tier allows plenty, and nothing in one
-needs preserving — `seed.Clips` rebuilds every row on boot:
+needs preserving: it starts empty, the migrations give it the schema on boot, and any
+rows you want in it go in through the CLI the same way they do anywhere else.
 
 ```powershell
 $env:TURSO_DATABASE_URL = "libsql://scratch-you.turso.io"
@@ -326,17 +333,22 @@ allows one writer and a bigger pool just buys `SQLITE_BUSY` errors. Remote uses 
 there is network latency rather than lock contention, and idle sockets to a remote host go
 stale silently.
 
-**No data migration is needed** to move to Turso. `seed.Clips` rebuilds every row from
-`clips/` plus the committed `names.json` on first boot, so an empty Turso database fills
-itself. The only thing in the local file that is not reproducible is play counts, and those
-are test data — clear them with `reset-plays -all` before launch either way.
+**Moving to Turso needs no data migration, but it does need the rows put back.** Nothing
+copies the local file across, and there is no boot-time seeding to rebuild it — an empty
+Turso database gets its schema from the migrations and nothing else. Point the CLI at the
+remote (both `TURSO_*` variables set in that shell) and `import -dir` refills it from your
+clip folder plus the committed `names.json`, which is how every row got into the local
+database too. Play counts are the one thing that does not carry over, and those are test
+data — clear them with `reset-plays -all` before launch either way.
 
 ### Status
 
 The Turso path is **implemented and verified against a live Turso database** (2026-08-29).
 Confirmed working end to end: both goose migrations applying on boot to an empty database,
-`seed.Clips` creating all 56 rows from `clips/` plus `names.json`, `GET /api/soundbites`
-returning them, a `POST .../play` write, and `cli list` / `cli import -dry-run` / `cli check`.
+all 56 rows present, `GET /api/soundbites` returning them, a `POST .../play` write, and
+`cli list` / `cli import -dry-run` / `cli check`. That run predates the removal of
+boot-time seeding — the rows it read were created by the seeder, which no longer exists;
+the CLI writes them now, but everything below it in the stack is the same code.
 
 **Transactions were the open question and they work.** `internal/db/migrate.go` runs goose
 on every boot and goose wraps each migration in a transaction; `cmd/cli/import.go` opens its
@@ -345,10 +357,15 @@ is state held on the server across requests rather than a lock on a file handle,
 not safe to assume — both paths were exercised against a real server before this note was
 written.
 
-The container image is built and verified too (2026-08-29): 54.6 MB, all six pages plus the
-404, all 56 clips, no `/data` directory. Running it confirmed migrations applying, seeding,
-the password prompt, audio streaming, `X-Robots-Tag`, and — with auth switched on — Docker's
-own `HEALTHCHECK` reporting `healthy`, which is what proves the `/api/health` exemption
-works where it matters.
+The container image was built and run end to end on 2026-08-29, while audio still shipped
+inside it: 54.6 MB, all six pages plus the 404, all 56 clips, no `/data` directory. That run
+confirmed migrations applying, the password prompt, audio streaming, `X-Robots-Tag`, and —
+with auth switched on — Docker's own `HEALTHCHECK` reporting `healthy`, which is what proves
+the `/api/health` exemption works where it matters.
+
+The image has been rebuilt since audio moved to R2 (43.9 MB, no clips directory), and the
+R2 path itself is verified: the redirect presigns, the delivered bytes match the local
+files, and the download filename survives the 302. Not yet repeated is the full
+in-container run with R2 credentials supplied.
 
 Still unexercised: an actual Railway deploy.
