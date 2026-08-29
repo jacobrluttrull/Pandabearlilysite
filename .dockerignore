@@ -17,7 +17,16 @@ soundboard-api/bin/
 soundboard-api/go.work
 soundboard-api/go.work.sum
 
-# Working copies of the clips. The served collection is soundboard-api/clips/.
+# Credentials for the local machine — Turso and R2 keys. They reach the container from
+# the environment, never from a file baked into a layer.
+soundboard-api/.env
+soundboard-api/.env.*
+
+# Clip audio. Production serves it from R2, so shipping ~6.5 MB of MP3s in the image
+# would only be a stale second copy of what the bucket already holds.
+soundboard-api/clips/
+
+# Working copies of the clips — staging, never the served collection.
 Pandalily Soundbites/
 
 # Rebuilt inside the image.

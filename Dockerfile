@@ -41,16 +41,18 @@ WORKDIR /app
 
 COPY --from=api   /out/api        /app/api
 COPY --from=web   /web/build      /app/web
-COPY soundboard-api/clips          /app/clips
 COPY soundboard-api/names.json     /app/names.json
 
-# The container holds no persistent state. The database is a network service (Turso),
-# reached with TURSO_DATABASE_URL and TURSO_AUTH_TOKEN supplied by the environment, so
-# nothing here has to outlive a deploy and no volume needs mounting. Clip audio ships in
-# the image because it is read-only at runtime, and shipping it means adding a soundbite
-# is a commit rather than a manual step against production.
-ENV SOUNDBOARD_AUDIO_DIR=/app/clips \
-	SOUNDBOARD_STATIC_DIR=/app/web \
+# The container holds no persistent state. The database is a network service (Turso) and
+# clip audio is object storage (Cloudflare R2), both reached with credentials supplied by
+# the environment, so nothing here has to outlive a deploy and no volume needs mounting.
+#
+# Clip audio deliberately does not ship in the image. Adding a soundbite is `cli upload`
+# against the bucket, not a rebuild, so the image no longer has to be redeployed to
+# publish one. SOUNDBOARD_AUDIO_DIR is left unset on purpose: there is no clips directory
+# in this image, and pointing at one that does not exist is how the local store gets
+# picked silently. The API refuses to boot if the R2 variables are missing.
+ENV SOUNDBOARD_STATIC_DIR=/app/web \
 	PORT=8080
 
 USER soundboard

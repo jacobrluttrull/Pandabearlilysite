@@ -46,6 +46,15 @@ func main() {
 		log.Fatalf("%v", err)
 	}
 
+	// And the other half of that check: no R2 variables at all is a valid local setup,
+	// but only if the folder it falls back to actually exists. The image has no clips
+	// directory, so this is what catches a deploy missing its R2 credentials.
+	if !cfg.R2().Configured() {
+		if err := clipstore.RequireLocalDir(cfg.AudioDir); err != nil {
+			log.Fatalf("%v", err)
+		}
+	}
+
 	clips := clipstore.Open(cfg.R2(), cfg.AudioDir)
 	log.Printf("clips: %s", clips.Describe())
 
