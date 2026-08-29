@@ -28,7 +28,7 @@
 				<div class="id-block">
 					<div class="specimen">
 						<div class="avatar-ring">
-							<img class="avatar" src="/images/pfp.png" alt="PandaLily" />
+							<img class="avatar" src="/images/pfp.webp" alt="PandaLily" />
 						</div>
 					</div>
 					<div class="id-info">

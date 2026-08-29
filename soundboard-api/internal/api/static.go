@@ -29,8 +29,18 @@ func staticHandler(dir string) http.Handler {
 
 		// Hashed build assets never change under a given name, so they can be cached
 		// hard. Everything else must revalidate or a deploy goes unnoticed.
-		if strings.HasPrefix(requested, "_app/immutable/") {
+		switch {
+		case strings.HasPrefix(requested, "_app/immutable/"):
 			w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+
+		// Images and fonts are the opposite case: heavy, but named by hand, so they
+		// cannot be immutable. With no header at all a browser revalidates every one on
+		// every visit — the avatar alone is 147 KB re-fetched on each page load. A week
+		// of caching removes that; the cost is that replacing a file under the same name
+		// takes up to a week to reach someone who has already seen it, so change the
+		// filename when the picture itself changes.
+		case isLongLivedAsset(requested):
+			w.Header().Set("Cache-Control", "public, max-age=604800")
 		}
 
 		candidates := []string{requested}
@@ -83,4 +93,19 @@ func existingFile(root, name string) (string, bool) {
 		return "", false
 	}
 	return path, true
+}
+
+// longLivedAssetExts are file types that are large, static, and referenced by a name the
+// site author chooses. HTML is deliberately absent: it is the file that names every other
+// one, so caching it is what makes a deploy go unnoticed.
+var longLivedAssetExts = map[string]bool{
+	".png": true, ".jpg": true, ".jpeg": true, ".webp": true, ".avif": true,
+	".gif": true, ".svg": true, ".ico": true,
+	".woff": true, ".woff2": true, ".ttf": true, ".otf": true,
+	".mp3": true, ".mp4": true, ".webm": true,
+}
+
+// isLongLivedAsset reports whether name is one of those file types.
+func isLongLivedAsset(name string) bool {
+	return longLivedAssetExts[strings.ToLower(path.Ext(name))]
 }

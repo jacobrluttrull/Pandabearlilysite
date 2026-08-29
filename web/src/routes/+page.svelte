@@ -12,7 +12,12 @@
 	<div class="hero-avatar-wrap">
 		<div class="canopy-glow" aria-hidden="true"></div>
 		<div class="hero-avatar">
-			<img class="avatar-portrait" src="/images/pfp.png" alt="PandaLily" />
+			<img
+				class="avatar-portrait"
+				src="/images/pfp.webp"
+				alt="PandaLily"
+				fetchpriority="high"
+			/>
 		</div>
 	</div>
 

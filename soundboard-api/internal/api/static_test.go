@@ -105,6 +105,21 @@ func TestStaticHandlerCachesImmutableAssets(t *testing.T) {
 	}
 }
 
+// Images are named by hand rather than hashed, so they cannot be immutable — but with no
+// header at all the browser re-fetches them on every visit, which is what Lighthouse
+// flagged on the 147 KB avatar.
+func TestStaticHandlerCachesImagesAndFonts(t *testing.T) {
+	h := staticHandler(buildDir(t))
+
+	rec := get(t, h, "/images/pfp.png")
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200", rec.Code)
+	}
+	if got := rec.Header().Get("Cache-Control"); got != "public, max-age=604800" {
+		t.Errorf("Cache-Control = %q, want a week of caching", got)
+	}
+}
+
 func TestStaticHandlerDoesNotCacheHTML(t *testing.T) {
 	h := staticHandler(buildDir(t))
 

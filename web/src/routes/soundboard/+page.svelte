@@ -92,7 +92,7 @@
 	<title>PandaLily — Soundboard</title>
 </svelte:head>
 
-<section class="soundboard">
+<section class="soundboard" class:awaiting-clips={status === 'loading'}>
 	<div class="header-row">
 		<div>
 			<h1>Soundboard</h1>
@@ -220,6 +220,15 @@
 		max-width: var(--container-max);
 		margin: 0 auto;
 		padding: var(--space-4) var(--space-3) var(--space-6);
+	}
+
+	/* The clip list arrives after the page paints, so without reserved height the footer
+	   renders near the top and is then shoved down by 24 tiles — a 0.17 layout shift, the
+	   single worst thing on this page's Core Web Vitals. Holding a viewport's worth of
+	   space until the grid lands keeps the footer below the fold, so the fill-in is not a
+	   visible shift. Released as soon as the real content decides the height. */
+	.soundboard.awaiting-clips {
+		min-height: 100vh;
 	}
 
 	.header-row {
