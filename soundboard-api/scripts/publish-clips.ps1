@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Publish every new clip in the staging folder to the live soundboard.
 
@@ -37,7 +37,7 @@ if (-not (Test-Path $clipsDir)) {
 
 $mp3Count = @(Get-ChildItem -Path $clipsDir -Filter *.mp3 -File).Count
 if ($mp3Count -eq 0) {
-    Write-Host "No .mp3 files in $clipsDir — nothing to publish." -ForegroundColor Yellow
+    Write-Host "No .mp3 files in $clipsDir - nothing to publish." -ForegroundColor Yellow
     exit 0
 }
 
@@ -54,14 +54,14 @@ try {
         if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
         Write-Host ""
-        Write-Host "Dry run only — nothing was published. Re-run without -DryRun to publish." -ForegroundColor Yellow
+        Write-Host "Dry run only - nothing was published. Re-run without -DryRun to publish." -ForegroundColor Yellow
         exit 0
     }
 
     go run .\cmd\cli import -dir $clipsDir
     if ($LASTEXITCODE -ne 0) {
         Write-Host ""
-        Write-Host "Import failed — skipping the audit." -ForegroundColor Red
+        Write-Host "Import failed - skipping the audit." -ForegroundColor Red
         exit $LASTEXITCODE
     }
 
