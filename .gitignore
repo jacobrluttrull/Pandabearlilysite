@@ -62,3 +62,6 @@ go.work.sum
 # Playwright MCP scratch output (screenshots/snapshots taken during review)
 /.review
 /.playwright-mcp
+
+# Claude Code project instructions — local working notes, not site content
+CLAUDE.md
