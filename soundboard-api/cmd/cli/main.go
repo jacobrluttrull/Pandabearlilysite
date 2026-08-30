@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+
+	"soundboard-api/internal/config"
 )
 
 // commands maps each subcommand name to its handler and the one-line description shown
@@ -33,6 +35,13 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Loaded before any command runs, and before config.Load reads the environment.
+	// Without this the CLI falls back to its local defaults in a fresh shell and
+	// publishes to a local file instead of Turso and R2 — successfully, and silently.
+	if err := loadEnvFile(); err != nil {
+		log.Fatalf("load .env: %v", err)
+	}
+
 	for _, cmd := range commands {
 		if cmd.name != os.Args[1] {
 			continue
@@ -46,6 +55,20 @@ func main() {
 	fmt.Fprintf(os.Stderr, "unknown command %q\n\n", os.Args[1])
 	usage()
 	os.Exit(1)
+}
+
+// loadEnvFile finds the nearest .env and reads it into the environment. Searching a few
+// levels up means the CLI works run from soundboard-api/ or from the repo root.
+func loadEnvFile() error {
+	wd, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	path := config.FindDotEnv(wd, 2)
+	if path == "" {
+		return nil
+	}
+	return config.LoadDotEnv(path)
 }
 
 func usage() {

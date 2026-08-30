@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 
 	"soundboard-api/internal/clipstore"
 	"soundboard-api/internal/config"
@@ -62,7 +63,24 @@ func openStore() (*store, error) {
 		return nil, fmt.Errorf("clip store is read-only, cannot manage clips")
 	}
 
+	// Printed on every command, to stderr so it never contaminates piped output. The
+	// failure this guards against is not an error but a success against the wrong
+	// target: with no environment set, DBPath and AudioDir both have working local
+	// defaults, so an import writes to a file on this machine and reports that it
+	// worked. Naming the target makes that visible in the one place it matters.
+	fmt.Fprintf(os.Stderr, "using %s, clips in %s\n\n", describeDatabase(cfg), clips.Describe())
+
 	return &store{db: sqlDB, queries: gen.New(sqlDB), cfg: cfg, clips: clips}, nil
+}
+
+// describeDatabase names the database being used without revealing how to reach it.
+// DatabaseURL is a hostname and safe to show; the auth token that accompanies it is a
+// credential and never appears here, which is why this does not print the DSN.
+func describeDatabase(cfg config.Config) string {
+	if cfg.DatabaseURL != "" {
+		return "remote database " + cfg.DatabaseURL
+	}
+	return "local database file " + cfg.DBPath
 }
 
 func (s *store) Close() error {
