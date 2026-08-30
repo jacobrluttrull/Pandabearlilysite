@@ -10,6 +10,30 @@ unexpected.
 cd "E:\Coding Projects\pandabearlily\soundboard-api"
 ```
 
+## Where the clips go
+
+Every command prints what it resolved before it does anything:
+
+```
+using remote database libsql://...turso.io, clips in Cloudflare R2 bucket pbsoundbites
+```
+
+**Read that line before publishing.** Credentials come from `.env` (gitignored), which is
+loaded automatically — `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for the database, the
+four `R2_*` keys for the audio. Anything already set in the shell wins over the file.
+
+With `.env` missing or incomplete the commands still succeed, against
+`data/soundboard.db` and `clips/` on this machine. That is a real local setup, not an
+error — but it is not the live site, and the banner is what tells the two apart. Both
+halves resolve independently, so a half-filled `.env` can put audio in the real bucket
+and rows in a local file.
+
+To work locally on purpose, override for that shell only:
+
+```powershell
+$env:TURSO_DATABASE_URL = ""; $env:R2_BUCKET = ""
+```
+
 ## Everyday tasks
 
 **Add one new clip** — the common case. Length is measured from the file and the label is
