@@ -49,6 +49,26 @@ Override either default when you want to:
 go run .\cmd\cli upload "C:\path\to\clip.mp3" -name "the good one" -date-made 2026-08-27
 ```
 
+**The one-command way** — the `clips` alias wraps the whole batch flow. Drop `.mp3` files
+into `Pandalily Soundbites\` at the repo root, then from any directory:
+
+```powershell
+clips -DryRun   # preview: what would be added, what is already stored
+clips           # publish, then audit
+```
+
+It imports everything not yet published and runs `check` afterwards. Already-stored clips
+are skipped, so re-running only ever adds what is missing. The alias lives in your
+PowerShell profile and points at `scripts\publish-clips.ps1`; the raw commands it runs are
+below, for when you want a step on its own.
+
+To create the alias on a new machine, add this line to your PowerShell profile
+(`notepad $PROFILE`) and restart the terminal:
+
+```powershell
+Set-Alias clips "E:\Coding Projects\pandabearlily\soundboard-api\scripts\publish-clips.ps1"
+```
+
 **Add a batch of clips** — drop them in a folder, then:
 
 ```powershell
