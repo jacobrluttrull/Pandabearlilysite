@@ -1,25 +1,44 @@
 # PandalilySite
 
-A fan site for the VTuber PandaLily, replacing her [carrd page](https://pandabearlily.carrd.co/) — which reads poorly on mobile, buries the character references, and has no room for anything interactive.
+A fan site for Pandalily to improve on her carrd site. It was just my spin on what she had already to improve for UI experience and expandability down the line. 
 
 ## What it does
 
 Six pages, all served from one process:
 
-| Page | What's on it |
-| --- | --- |
-| **Home / Links** | Tagline, avatar, and every stream and social link in one place |
-| **About** | Character and streamer intro |
-| **Art** | Commissioned artwork gallery with a lightbox, each piece credited to its artist |
-| **Ref Sheet** | Full-size character references — the part of the old site that was worst on mobile |
-| **Credits** | Everyone who worked on the model, stream assets, emotes, and music |
-| **Soundboard** | A searchable grid of 56 soundbites: tap a tile to play it, watch its play tally, or download the clip |
+Page
+
+What's on it
+
+**Home / Links**
+
+Tagline, avatar, and every stream and social link in one place
+
+**About**
+
+Character and streamer intro
+
+**Art**
+
+Commissioned artwork gallery with a lightbox, each piece credited to its artist
+
+**Ref Sheet**
+
+Full-size character references — the part of the old site that was worst on mobile
+
+**Credits**
+
+Everyone who worked on the model, stream assets, emotes, and music
+
+**Soundboard**
+
+A searchable grid of soundbites: tap a tile to play it, watch its play tally, or download the clip
 
 Throughout:
 
-- **Two themes** — `bamboo` (dark, glassmorphic) and `cream` (light, papery) — toggled from the nav and remembered between visits. The stored choice is applied before first paint, so there's no flash of the wrong theme.
-- **Built for phones first**, which is the whole reason the site exists.
-- **Private by default.** The site sits behind a password, sends `X-Robots-Tag: noindex` on every response, disallows all crawlers in `robots.txt`, and carries an unofficial-fan-site disclaimer in the footer. It's an unofficial site for someone else's character, so it isn't meant to be a public, indexed one.
+-   **Two themes** — `bamboo` (dark, glassmorphic) and `cream` (light, papery) — toggled from the nav and remembered between visits. The stored choice is applied before first paint, so there's no flash of the wrong theme.
+-   **Built for phones first**, which is the whole reason the site exists.
+-   **Private by default.** The site sits behind a password, sends `X-Robots-Tag: noindex` on every response, disallows all crawlers in `robots.txt`, and carries an unofficial-fan-site disclaimer in the footer. It's an unofficial site for someone else's character, so it isn't meant to be a public, indexed one.
 
 ## Stack
 
@@ -37,13 +56,29 @@ A monorepo with the frontend and backend kept fully separate:
 
 The site is fully static, but the clip list isn't — it changes whenever a clip is added. So the soundboard page prerenders to a shell and fetches its grid from the API in the browser:
 
-| Endpoint | Purpose |
-| --- | --- |
-| `GET /api/soundbites` | The clip list as JSON |
-| `GET /api/soundbites/{id}/audio` | Stream a clip for playback (range requests supported) |
-| `GET /api/soundbites/{id}/download` | The same bytes, sent as a file named after the clip's label |
-| `POST /api/soundbites/{id}/play` | Record one play, returns the new total |
-| `GET /api/health` | Liveness probe — the one route the password doesn't cover |
+Endpoint
+
+Purpose
+
+`GET /api/soundbites`
+
+The clip list as JSON
+
+`GET /api/soundbites/{id}/audio`
+
+Stream a clip for playback (range requests supported)
+
+`GET /api/soundbites/{id}/download`
+
+The same bytes, sent as a file named after the clip's label
+
+`POST /api/soundbites/{id}/play`
+
+Record one play, returns the new total
+
+`GET /api/health`
+
+Liveness probe — the one route the password doesn't cover
 
 The frontend takes no environment variables. It calls `/api` on its own origin, which the Go binary serves in production and Vite proxies to `localhost:8080` in development, so there's no API URL to get wrong in either place.
 
@@ -51,7 +86,7 @@ The frontend takes no environment variables. It calls `/api` on its own origin, 
 
 ```powershell
 cd soundboard-api
-go run .\cmd\api          # API on :8080, local SQLite file, clips from .\clips
+go run .cmdapi          # API on :8080, local SQLite file, clips from .clips
 ```
 
 ```powershell
@@ -70,8 +105,8 @@ Clips are added with the Go CLI rather than by hand-editing anything — it meas
 
 ```powershell
 cd soundboard-api
-go run .\cmd\cli upload "C:\path\to\new-clip.mp3"
-go run .\cmd\cli check
+go run .cmdcli upload "C:pathtonew-clip.mp3"
+go run .cmdcli check
 ```
 
 See [`soundboard-api/README.md`](soundboard-api/README.md) for the full command list, the environment variables, and how the Turso and R2 connections are configured.
