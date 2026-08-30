@@ -2,23 +2,30 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
+	"io/fs"
 	"os"
 	"sort"
 
 	"soundboard-api/internal/clipname"
 )
 
-// runCheck audits the three places a clip exists — the database, the audio dir, and the
-// names file — and reports anything that has drifted out of sync.
+// runCheck audits the places a clip exists — the database, the clip store, and the names
+// file — and reports anything that has drifted out of sync.
 //
-// Worth running before launch: it catches rows whose audio never copied, audio files
-// orphaned by a manual delete, and duplicate content that dedupe would collapse.
+// The clip store is the authority on what a visitor can actually hear, which since the
+// move to R2 is the bucket rather than a folder on this machine. Auditing the local
+// folder instead would report every clip published from another checkout as missing
+// audio, when the site serves it perfectly well.
+//
+// The local folder is still reported, but as a working copy: it is the second copy of the
+// audio and worth knowing about, not a fault when it lags.
 func runCheck(args []string) error {
-	fs := flag.NewFlagSet("check", flag.ExitOnError)
-	namesPath := fs.String("names", clipname.DefaultPath, "path to the names file")
-	if err := fs.Parse(args); err != nil {
+	fs_ := flag.NewFlagSet("check", flag.ExitOnError)
+	namesPath := fs_.String("names", clipname.DefaultPath, "path to the names file")
+	if err := fs_.Parse(args); err != nil {
 		return err
 	}
 
@@ -40,7 +47,15 @@ func runCheck(args []string) error {
 		return err
 	}
 
-	onDisk, err := findMP3s(st.cfg.AudioDir)
+	// What the site can actually serve.
+	publishedList, err := st.clips.List(ctx)
+	if err != nil {
+		return fmt.Errorf("list %s: %w", st.clips.Describe(), err)
+	}
+
+	// The local working copy. Absent is fine — a checkout that publishes straight to the
+	// bucket never needs one.
+	onDisk, err := localClips(st.cfg.AudioDir)
 	if err != nil {
 		return err
 	}
@@ -49,27 +64,32 @@ func runCheck(args []string) error {
 	for _, sb := range soundbites {
 		inDB[sb.Filename] = true
 	}
-	stored := make(map[string]bool, len(onDisk))
+	published := make(map[string]bool, len(publishedList))
+	for _, filename := range publishedList {
+		published[filename] = true
+	}
+	local := make(map[string]bool, len(onDisk))
 	for _, filename := range onDisk {
-		stored[filename] = true
+		local[filename] = true
 	}
 
 	problems := 0
 
-	// Rows whose audio is missing: the clip is listed but cannot play.
+	// Rows whose audio is missing from the store: the clip is listed on the site but
+	// 404s when tapped. This is the one that matters.
 	for _, sb := range soundbites {
-		if !stored[sb.Filename] {
-			fmt.Printf("  MISSING AUDIO  %s (row #%d) — listed but no file in %s\n",
-				sb.Filename, sb.ID, st.cfg.AudioDir)
+		if !published[sb.Filename] {
+			fmt.Printf("  MISSING AUDIO  %s (row #%d) — listed but not in %s\n",
+				sb.Filename, sb.ID, st.clips.Describe())
 			problems++
 		}
 	}
 
-	// Audio with no row: dead weight, never served.
-	for _, filename := range onDisk {
+	// Audio with no row: dead weight, never served, still paying for storage.
+	for _, filename := range publishedList {
 		if !inDB[filename] {
-			fmt.Printf("  ORPHAN FILE    %s — in %s but not in the database\n",
-				filename, st.cfg.AudioDir)
+			fmt.Printf("  ORPHAN CLIP    %s — in %s but not in the database\n",
+				filename, st.clips.Describe())
 			problems++
 		}
 	}
@@ -87,7 +107,9 @@ func runCheck(args []string) error {
 		problems++
 	}
 
-	// Byte-identical clips that dedupe would collapse.
+	// Byte-identical clips that dedupe would collapse. This needs the bytes, so it can
+	// only cover what is on this machine; clips published from elsewhere are skipped and
+	// counted, so a partial scan is never mistaken for a clean one.
 	groups, err := groupByContent(soundbites, st.cfg.AudioDir)
 	if err != nil {
 		return err
@@ -101,10 +123,23 @@ func runCheck(args []string) error {
 		problems += len(group) - 1
 	}
 
-	fmt.Printf("\n%d clip(s) in the database, %d audio file(s) on disk, %d name(s) on file\n",
-		len(soundbites), len(onDisk), len(overrides))
+	fmt.Printf("\n%d clip(s) in the database, %d in %s, %d name(s) on file\n",
+		len(soundbites), len(publishedList), st.clips.Describe(), len(overrides))
 
-	// Not an error condition, just worth knowing before launch.
+	// The local folder is a backup, not a fault. Say where it stands without counting it
+	// as a problem, since losing both it and the store is what actually loses the clips.
+	missingLocally := 0
+	for _, sb := range soundbites {
+		if published[sb.Filename] && !local[sb.Filename] {
+			missingLocally++
+		}
+	}
+	if missingLocally > 0 {
+		fmt.Printf("%d published clip(s) have no copy in %s "+
+			"(not a problem, but the store is then the only copy of those)\n",
+			missingLocally, st.cfg.AudioDir)
+	}
+
 	var undated int
 	for _, sb := range soundbites {
 		if !sb.DateMade.Valid {
@@ -121,4 +156,17 @@ func runCheck(args []string) error {
 	}
 	fmt.Fprintf(os.Stderr, "%d problem(s) found\n", problems)
 	return nil
+}
+
+// localClips lists the local working copy, treating an absent folder as empty rather than
+// an error: publishing straight to a bucket never creates one.
+func localClips(dir string) ([]string, error) {
+	files, err := findMP3s(dir)
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	return files, nil
 }
