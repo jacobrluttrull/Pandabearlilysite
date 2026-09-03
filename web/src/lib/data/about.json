@@ -1,13 +1,24 @@
 {
 	"name": "PandaLily",
 	"role": "Spirit Guardian",
-	"tags": ["Half-Girl", "Half-Panda", "Bamboo Spirit"],
-	"bio": "Lily is the spirit guardian of the bamboo forest, tasked with protecting all creatures that reside within it from harm. Half girl, half panda, she can travel freely between the land of the living and the spirit realm. The forest has been at peace for some time, so with her guardian duties light these days, she spends her time searching for new friends while still caring for the home she calls her own.",
-	"duty": "In times of turmoil, Lily is a fierce warrior — trained by the Ancients, wielding weapons she's crafted herself, favoring the three-sectional staff. The will of the forest was bestowed on her as a child, leaving her with a forehead marking. Her aggressors know her by another name entirely, one spoken only in hushed, scared whispers — lest it wake the beast behind the bamboo stalks.",
-	"vitals": [
-		{ "label": "Species", "value": "Half-girl, half-panda" },
-		{ "label": "Role", "value": "Spirit Guardian" },
-		{ "label": "Home", "value": "The Bamboo Forest" }
+	"species": "Half-girl, half-panda",
+	"home": "The Bamboo Forest",
+	"bio": [
+		"Bio coming soon."
+	],
+	"lore": [
+		"Upon entering the bamboo forest, beyond the friendly creatures, beautiful bamboo trees, and calm atmosphere, you might see a presence like no other.",
+		"This presence is Lily, the spirit guardian of the bamboo forest.",
+		"The name Lily comes from the masters who taught her.",
+		"The half-panda, half-girl’s main goal is to protect all creatures that reside within from any harm that might come their way.",
+		"One way she ensures this is by having all creatures, no matter who they are, lick any outsiders coming in to ensure no harm comes the forest’s or creatures’ way.",
+		"Lily has the ability to travel through realms freely and effortlessly, meaning she holds unbelievable power.",
+		"But with the forest being so peaceful for the past hundred years, her guardian duties have been reduced over time.",
+		"Without needing to travel to the spirit realm often, she spends a good deal of her time looking for new friends.",
+		"But when the forest is in turmoil, Lily is not someone to mess with.",
+		"She is a fierce, strong warrior trained by the Ancients, who gave her the green mark on her forehead.",
+		"When battle is present, you might see her wield her favorite weapon: the three-sectional staff, crafted by Lily herself.",
+		"Aggressors of the forest knew the name Lily well, many keeping it quiet so as not to alert the spirit guardian, as that would guarantee their demise."
 	],
 	"affinities": [
 		"Plushies",
@@ -18,5 +29,13 @@
 		"Sunflowers",
 		"Crystal shrimp hand rolls"
 	],
-	"aversions": ["Peanut butter", "Heights", "Being abandoned", "Zombies"]
+	"youllLikeMeIf": ["Nintendo Titles", "Hollow Knight/Silksong", "Down to Earth People", "Loud Vtubers", "Chaos", "Welcoming Community", "Mediocre League Gameplay", "LGBTQ +"],
+	"aversions": [
+		"Peanut butter",
+		"Heights",
+		"Being abandoned",
+		"Zombies",
+		"Scorpions",
+		"Generative AI"
+	]
 }

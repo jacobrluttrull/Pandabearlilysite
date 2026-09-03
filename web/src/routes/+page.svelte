@@ -14,7 +14,7 @@
 		<div class="hero-avatar">
 			<img
 				class="avatar-portrait"
-				src="/images/pfp.webp"
+				src="/images/pfp.png"
 				alt="PandaLily"
 				fetchpriority="high"
 			/>

@@ -10,6 +10,34 @@ unexpected.
 cd "E:\Coding Projects\pandabearlily\soundboard-api"
 ```
 
+## Development and production are separate
+
+**Development is local by default.** `go run .\cmd\api` and `go run .\cmd\cli ...`
+use `data/soundboard.db` and `clips/` unless you explicitly set remote variables in the
+shell. The CLI no longer auto-loads a `.env` file, so routine work cannot touch the live
+database or bucket by accident.
+
+**Production runs on Railway.** Add these variables in the Railway service's
+**Variables** tab, then seal the credentials where Railway offers that option:
+
+```
+TURSO_DATABASE_URL
+TURSO_AUTH_TOKEN
+R2_ACCOUNT_ID
+R2_ACCESS_KEY_ID
+R2_SECRET_ACCESS_KEY
+R2_BUCKET
+SOUNDBOARD_AUTH_PASSWORD
+```
+
+`PORT` and `SOUNDBOARD_STATIC_DIR` come from the Dockerfile. Do not put production
+credentials in source control or a frontend environment file.
+
+**Publishing clips from this computer is deliberate.** Copy `.env.example` to the
+gitignored `.env.production.local`, enter the newly rotated Turso and R2 values, then run
+the `clips` alias. The script sets `SOUNDBOARD_ENV_FILE` for that command only. A direct
+CLI command remains local unless you set that variable yourself.
+
 ## Where the clips go
 
 Every command prints what it resolved before it does anything:
@@ -18,21 +46,10 @@ Every command prints what it resolved before it does anything:
 using remote database libsql://...turso.io, clips in Cloudflare R2 bucket pbsoundbites
 ```
 
-**Read that line before publishing.** Credentials come from `.env` (gitignored), which is
-loaded automatically — `TURSO_DATABASE_URL` and `TURSO_AUTH_TOKEN` for the database, the
-four `R2_*` keys for the audio. Anything already set in the shell wins over the file.
-
-With `.env` missing or incomplete the commands still succeed, against
-`data/soundboard.db` and `clips/` on this machine. That is a real local setup, not an
-error — but it is not the live site, and the banner is what tells the two apart. Both
-halves resolve independently, so a half-filled `.env` can put audio in the real bucket
-and rows in a local file.
-
-To work locally on purpose, override for that shell only:
-
-```powershell
-$env:TURSO_DATABASE_URL = ""; $env:R2_BUCKET = ""
-```
+**Read that line before publishing.** It identifies the database and clip store before
+any write. Normal commands say `local database file ...`; the publishing script says
+`remote database ...` and `Cloudflare R2 bucket ...`. If that is not what you intended,
+stop before running a command that changes clips.
 
 ## Everyday tasks
 
@@ -321,7 +338,8 @@ string, and its shape picks the path.
 Both drivers are pure Go, so `CGO_ENABLED=0` still builds a static binary and Windows
 still needs no C toolchain.
 
-**Point it at Turso** by setting the two variables for the session:
+**Point a one-off session at Turso** only when you intentionally need to inspect a
+throwaway or remote database:
 
 ```powershell
 $env:TURSO_DATABASE_URL = "libsql://soundboard-you.turso.io"
@@ -336,10 +354,9 @@ to the remote database rather than your local file. Unset them to go back:
 Remove-Item Env:TURSO_DATABASE_URL, Env:TURSO_AUTH_TOKEN
 ```
 
-Setting them in one PowerShell window affects only that window. To make it stick across
-new shells, use `[Environment]::SetEnvironmentVariable("TURSO_DATABASE_URL", "libsql://...", "User")`
-— but prefer the per-session form, so you cannot forget you left the CLI pointed at
-production.
+Setting them in one PowerShell window affects only that window. Do not persist production
+credentials as Windows user variables: Railway supplies them to the deployed service, and
+`.env.production.local` is the deliberate local mechanism for publishing clips.
 
 **Testing the remote path — `turso dev` is not available on Windows.** `turso dev` runs a
 local libSQL server speaking the real protocol, which would exercise the remote driver

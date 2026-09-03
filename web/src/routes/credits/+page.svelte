@@ -2,6 +2,7 @@
 	import Card from '$lib/components/Card.svelte';
 	import Chip from '$lib/components/Chip.svelte';
 	import CategoryIcon from '$lib/components/CategoryIcon.svelte';
+	import MediaActions from '$lib/components/MediaActions.svelte';
 	import credits from '$lib/data/credits.json';
 
 	type CategoryMeta = {
@@ -24,6 +25,10 @@
 	// a role with no name on file yet — real and accurate, not a bug.
 	function isPending(name: string): boolean {
 		return !name?.trim() || name.trim().toUpperCase() === 'TBD';
+	}
+
+	function isVideo(assetPath: string): boolean {
+		return /\.(mp4|webm)$/i.test(assetPath);
 	}
 
 	// tracks which entries' <img> failed to load, keyed by category+role, so
@@ -60,16 +65,33 @@
 						{@const key = `${category}-${role}`}
 						<li class="entry" class:pending>
 							{#if image && !failed[key]}
-								<img
-									class="entry-thumb"
-									src={image}
-									alt=""
-									loading="lazy"
-									onerror={() => markFailed(key)}
-								/>
+								{#if isVideo(image)}
+									<video
+										class="entry-thumb entry-video"
+										src={image}
+										autoplay
+										muted
+										loop
+										playsinline
+										preload="metadata"
+										aria-hidden="true"
+										onerror={() => markFailed(key)}
+									></video>
+								{:else}
+									<img
+										class="entry-thumb"
+										src={image}
+										alt=""
+										loading="lazy"
+										onerror={() => markFailed(key)}
+									/>
+								{/if}
 							{/if}
 							<div class="entry-info">
 								<Chip>{role}</Chip>
+								{#if category === 'Stream Assets & Screens' && image && !failed[key]}
+									<MediaActions asset={image} label={role} />
+								{/if}
 								{#if pending}
 									<!-- no name on file yet — the image and role speak for themselves -->
 								{:else if url}
@@ -128,6 +150,7 @@
 	.category-grid {
 		display: grid;
 		grid-template-columns: 1fr;
+		align-items: start;
 		gap: var(--space-3);
 	}
 
@@ -202,6 +225,19 @@
 		object-fit: contain;
 		background: var(--color-surface);
 		border: 1px solid var(--color-border);
+	}
+
+	/* Stream graphics are deliberately wide: keeping them in the same square
+	   tile as a profile image makes the artwork read smaller than it is. One
+	   full-width row gives the logo and screens room without cropping or
+	   asking the browser to upscale the source files. */
+	:global(.category-card.assets) .entry-list {
+		grid-template-columns: 1fr;
+	}
+
+	:global(.category-card.assets) .entry-thumb {
+		max-width: none;
+		aspect-ratio: 16 / 9;
 	}
 
 	.entry-info {

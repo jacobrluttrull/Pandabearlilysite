@@ -86,7 +86,7 @@ The frontend takes no environment variables. It calls `/api` on its own origin, 
 
 ```powershell
 cd soundboard-api
-go run .cmdapi          # API on :8080, local SQLite file, clips from .clips
+go run .\cmd\api        # API on :8080, local SQLite file, clips from .\clips
 ```
 
 ```powershell
@@ -96,6 +96,10 @@ npm run dev               # site on :5173, /api proxied to :8080
 ```
 
 Neither half needs credentials to run: with no Turso variables set the database is a file under `soundboard-api/data/`, and with no R2 variables set clips are read from `soundboard-api/clips/`.
+
+Production credentials belong in Railway's service variables, never in the frontend or
+source control. See `soundboard-api/README.md` for the deliberate local-versus-production
+publishing flow.
 
 Tests: `go test ./...` in `soundboard-api/`, `npm test` (Vitest) and `npm run check` (svelte-check) in `web/`.
 

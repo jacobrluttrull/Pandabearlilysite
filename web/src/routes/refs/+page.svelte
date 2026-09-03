@@ -1,6 +1,7 @@
 <script lang="ts">
 	import Card from '$lib/components/Card.svelte';
 	import BambooSprout from '$lib/components/BambooSprout.svelte';
+	import MediaActions from '$lib/components/MediaActions.svelte';
 	import refSheet from '$lib/data/ref-sheet.json';
 
 	type RefEntry = {
@@ -63,6 +64,9 @@
 						</div>
 					{/if}
 				</div>
+				{#if showsImage(entry)}
+					<MediaActions asset={entry.image} label={entry.title} />
+				{/if}
 
 				<p class="plate-caption">
 					<span class="fig-tag">FIG.{pad(i + 1)}</span>
@@ -105,10 +109,11 @@
 
 	@media (min-width: 760px) {
 		.plates {
-			/* deliberately caps at two columns (not three, like Art's gallery
-			   wall) — fewer, larger plates read as "study this closely",
-			   not "browse many thumbnails" */
-			grid-template-columns: repeat(2, 1fr);
+			/* all three sheets deserve the main sheet's readable footprint. A
+			   centered single column avoids shrinking the detail sheets merely
+			   to fit an arbitrary grid. */
+			grid-template-columns: minmax(0, 52rem);
+			justify-content: center;
 		}
 	}
 

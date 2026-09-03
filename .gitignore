@@ -5,9 +5,10 @@ Thumbs.db
 # IDE
 .idea/
 
-# Claude Code agents / skills (local tooling config, not site content)
+# Local agent tooling (not site content)
 .agents/
 .claude/
+.codex/
 skills-lock.json
 
 # Node / SvelteKit (web/)
@@ -63,8 +64,9 @@ go.work.sum
 /.review
 /.playwright-mcp
 
-# Claude Code project instructions — local working notes, not site content
+# Project-agent instructions — local working notes, not site content
 CLAUDE.md
+AGENTS.md
 
 # Improvements for Current Site — local working notes, not site content
 IMPROVEMENTS.md

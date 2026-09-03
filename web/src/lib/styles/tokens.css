@@ -94,6 +94,7 @@
 	--text-headline-lg: 800 2.625rem/1.15 var(--font-heading);
 	--text-headline-lg-mobile: 800 2.1rem/1.2 var(--font-heading);
 	--text-headline-md: 700 1.575rem/1.3 var(--font-heading);
+	--text-heading-sm: 800 1.18rem/1.2 var(--font-heading);
 	--text-body-lg: 400 1.18rem/1.6 var(--font-body);
 	--text-body-md: 400 1.05rem/1.6 var(--font-body);
 	--text-label: 700 0.89rem/1.2 var(--font-body);

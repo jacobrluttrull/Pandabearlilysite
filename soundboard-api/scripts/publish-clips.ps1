@@ -29,6 +29,7 @@ $ErrorActionPreference = 'Stop'
 $apiDir = Split-Path $PSScriptRoot -Parent
 $repoDir = Split-Path $apiDir -Parent
 $clipsDir = Join-Path $repoDir 'Pandalily Soundbites'
+$productionEnv = Join-Path $apiDir '.env.production.local'
 
 if (-not (Test-Path $clipsDir)) {
     Write-Error "Staging folder not found: $clipsDir"
@@ -41,6 +42,11 @@ if ($mp3Count -eq 0) {
     exit 0
 }
 
+if (-not (Test-Path -LiteralPath $productionEnv -PathType Leaf)) {
+    Write-Error "Production credentials file not found: $productionEnv`nCopy .env.example to .env.production.local and add freshly rotated publishing credentials."
+    exit 1
+}
+
 Write-Host "$mp3Count mp3 file(s) staged in $clipsDir" -ForegroundColor Cyan
 Write-Host ""
 
@@ -48,6 +54,8 @@ Write-Host ""
 # default paths relative to the working directory. Push/Pop leaves the caller's
 # location untouched either way.
 Push-Location $apiDir
+$previousEnvFile = [Environment]::GetEnvironmentVariable('SOUNDBOARD_ENV_FILE', 'Process')
+[Environment]::SetEnvironmentVariable('SOUNDBOARD_ENV_FILE', $productionEnv, 'Process')
 try {
     if ($DryRun) {
         go run .\cmd\cli import -dir $clipsDir -dry-run
@@ -76,5 +84,11 @@ try {
     Write-Host "Done. Refresh the soundboard to see the new clips." -ForegroundColor Green
 }
 finally {
+    if ($null -eq $previousEnvFile) {
+        Remove-Item Env:SOUNDBOARD_ENV_FILE -ErrorAction SilentlyContinue
+    }
+    else {
+        [Environment]::SetEnvironmentVariable('SOUNDBOARD_ENV_FILE', $previousEnvFile, 'Process')
+    }
     Pop-Location
 }

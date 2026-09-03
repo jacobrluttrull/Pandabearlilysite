@@ -28,7 +28,9 @@
 
 <header class="nav">
 	<div class="nav-inner">
-		<a class="wordmark" href="/">PandaLily</a>
+		<a class="wordmark" href="/" aria-label="PandaLily home">
+			<img src="/images/credits/logo.png" alt="" />
+		</a>
 		<nav aria-label="Main">
 			<ul>
 				{#each tabs as tab (tab.href)}
@@ -102,11 +104,14 @@
 	.wordmark {
 		grid-area: brand;
 		justify-self: start;
-		font-family: var(--font-heading);
-		font-weight: 700;
-		font-size: 1.5rem;
-		color: var(--color-text);
-		text-decoration: none;
+		display: inline-flex;
+		line-height: 0;
+	}
+
+	.wordmark img {
+		display: block;
+		width: 7rem;
+		height: auto;
 	}
 
 	nav {
@@ -212,8 +217,8 @@
 			font-size: 0.8rem;
 		}
 
-		.wordmark {
-			font-size: 1.25rem;
+		.wordmark img {
+			width: 6rem;
 		}
 	}
 </style>

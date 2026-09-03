@@ -35,11 +35,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	// Loaded before any command runs, and before config.Load reads the environment.
-	// Without this the CLI falls back to its local defaults in a fresh shell and
-	// publishes to a local file instead of Turso and R2 — successfully, and silently.
+	// Local is the safe default. A CLI command only reads a credentials file when the
+	// caller explicitly selects one with SOUNDBOARD_ENV_FILE. That makes `go run
+	// .\cmd\cli ...` safe to use while developing: it cannot accidentally publish to
+	// Turso or R2 just because a production .env file is sitting beside the project.
 	if err := loadEnvFile(); err != nil {
-		log.Fatalf("load .env: %v", err)
+		log.Fatalf("load selected environment file: %v", err)
 	}
 
 	for _, cmd := range commands {
@@ -57,16 +58,16 @@ func main() {
 	os.Exit(1)
 }
 
-// loadEnvFile finds the nearest .env and reads it into the environment. Searching a few
-// levels up means the CLI works run from soundboard-api/ or from the repo root.
+// loadEnvFile reads only an explicitly selected credentials file. Production credentials
+// belong in Railway for the deployed service; .env.production.local is solely the
+// developer's deliberate opt-in for CLI publishing from this machine.
 func loadEnvFile() error {
-	wd, err := os.Getwd()
-	if err != nil {
-		return err
-	}
-	path := config.FindDotEnv(wd, 2)
+	path := os.Getenv("SOUNDBOARD_ENV_FILE")
 	if path == "" {
 		return nil
+	}
+	if _, err := os.Stat(path); err != nil {
+		return fmt.Errorf("open %q: %w", path, err)
 	}
 	return config.LoadDotEnv(path)
 }

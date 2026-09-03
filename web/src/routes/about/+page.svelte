@@ -18,53 +18,47 @@
 </svelte:head>
 
 <section class="about-page">
-	<header class="page-header">
-		<h1>{about.name}</h1>
-	</header>
-
 	<div class="registry-grid">
 		<Card class="dossier-card" rail>
 			<div class="dossier-head">
 				<div class="id-block">
 					<div class="specimen">
 						<div class="avatar-ring">
-							<img class="avatar" src="/images/pfp.webp" alt="PandaLily" />
+							<img class="avatar" src="/images/pfp.png" alt="PandaLily" />
 						</div>
 					</div>
 					<div class="id-info">
-						<h2>{about.name}</h2>
-						<p class="role">{about.role}</p>
-						<div class="tags">
-							{#each about.tags as tag (tag)}
-								<Chip>{tag}</Chip>
-							{/each}
-						</div>
+						<h1>{about.name}</h1>
+						<dl class="identity-facts">
+							<div>
+								<dt>Role</dt>
+								<dd>{about.role}</dd>
+							</div>
+							<div>
+								<dt>Species</dt>
+								<dd>{about.species}</dd>
+							</div>
+							<div>
+								<dt>Home</dt>
+								<dd>{about.home}</dd>
+							</div>
+						</dl>
 					</div>
 				</div>
 			</div>
 
-			<p class="bio">{about.bio}</p>
+			<div class="bio">
+				<h3>Bio</h3>
+				<p>{about.bio.join(' ')}</p>
+			</div>
 
-			<div class="duty">
+			<div class="lore">
 				<h3>Lore</h3>
-				<p>{about.duty}</p>
+				<p>{about.lore.join(' ')}</p>
 			</div>
 		</Card>
 
-		<Card class="vitals-card">
-			<h3>Vitals</h3>
-			<dl class="ledger">
-				{#each about.vitals as vital (vital.label)}
-					<div class="ledger-row">
-						<dt>{vital.label}</dt>
-						<span class="leader" aria-hidden="true"></span>
-						<dd>{vital.value}</dd>
-					</div>
-				{/each}
-			</dl>
-		</Card>
-
-		<Card class="provisions-card">
+		<Card class="favorite-things-card">
 			<h3>Favorite Things</h3>
 			<ul class="provisions-list">
 				{#each about.affinities as item (item)}
@@ -72,6 +66,17 @@
 				{/each}
 			</ul>
 		</Card>
+
+		{#if about.youllLikeMeIf.length > 0}
+			<Card class="compatibility-card">
+				<h3>You’ll like me if...</h3>
+				<ul class="compatibility-list">
+					{#each about.youllLikeMeIf as interest (interest)}
+						<li><Chip>{interest}</Chip></li>
+					{/each}
+				</ul>
+			</Card>
+		{/if}
 
 		<Card class="hazards-card">
 			<h3>Hazard Log</h3>
@@ -92,25 +97,10 @@
 		padding: var(--space-6) var(--space-3) var(--space-6);
 	}
 
-	.page-header {
-		display: flex;
-		flex-direction: column;
-		gap: var(--space-1);
-		text-align: center;
-		margin-bottom: var(--space-4);
-	}
-
 	h1 {
 		font: var(--text-headline-lg-mobile);
 		color: var(--color-ink);
 		margin: 0;
-	}
-
-	.lede {
-		font: var(--text-body-lg);
-		color: var(--color-text-muted);
-		max-width: 640px;
-		margin: 0 auto;
 	}
 
 	.registry-grid {
@@ -126,8 +116,8 @@
 		gap: var(--space-3);
 	}
 
-	:global(.vitals-card),
-	:global(.provisions-card),
+	:global(.favorite-things-card),
+	:global(.compatibility-card),
 	:global(.hazards-card) {
 		display: flex;
 		flex-direction: column;
@@ -136,17 +126,15 @@
 
 	.dossier-head {
 		display: flex;
-		flex-wrap: wrap;
-		align-items: center;
-		justify-content: space-between;
-		gap: var(--space-3);
+		justify-content: center;
 	}
 
 	.id-block {
 		display: flex;
 		align-items: center;
-		gap: var(--space-2);
-		flex: 1 1 260px;
+		justify-content: center;
+		gap: var(--space-3);
+		margin-inline: auto;
 	}
 
 	.specimen {
@@ -164,41 +152,64 @@
 	}
 
 	.avatar {
-		width: 4rem;
-		height: 4rem;
+		width: 8rem;
+		height: 8rem;
 		border-radius: 50%;
 		object-fit: cover;
 		object-position: top center;
 		border: 1px solid var(--color-border);
 	}
 
-	h2 {
-		font: var(--text-headline-md);
+	.identity-facts {
+		display: grid;
+		grid-template-columns: max-content minmax(0, 1fr);
+		gap: 0.3rem var(--space-2);
+		margin: var(--space-1) 0 0;
+	}
+
+	.identity-facts div {
+		display: contents;
+	}
+
+	.identity-facts dt {
+		font: var(--text-label);
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--color-text-muted);
+	}
+
+	.identity-facts dd {
+		font: var(--text-body-md);
 		color: var(--color-ink);
 		margin: 0;
 	}
 
-	.role {
-		font: var(--text-label);
-		text-transform: uppercase;
-		letter-spacing: 0.04em;
-		color: var(--color-accent-strong);
-		margin: 0.15rem 0 var(--space-1);
-	}
-
-	.tags {
+	.compatibility-list {
 		display: flex;
 		flex-wrap: wrap;
 		gap: var(--space-1);
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	.compatibility-list li {
+		display: flex;
 	}
 
 	.bio {
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+	}
+
+	.bio p {
 		font: var(--text-body-md);
 		color: var(--color-text);
 		margin: 0;
 	}
 
-	.duty {
+	.lore {
 		display: flex;
 		flex-direction: column;
 		gap: 0.35rem;
@@ -214,50 +225,21 @@
 		margin: 0;
 	}
 
-	.duty p {
+	.bio h3,
+	.lore h3 {
+		font: var(--text-heading-sm);
+		text-transform: none;
+		letter-spacing: 0.02em;
+		color: var(--color-accent-strong);
+	}
+
+	.lore p {
 		font: var(--text-body-md);
 		color: var(--color-text);
 		margin: 0;
 	}
 
-	/* Vitals: a field-guide spec ledger with dotted leaders between label and value */
-	.ledger {
-		display: flex;
-		flex-direction: column;
-		gap: 0.55rem;
-		margin: 0;
-		padding: 0;
-	}
-
-	.ledger-row {
-		display: flex;
-		align-items: baseline;
-		gap: 0.5rem;
-		margin: 0;
-	}
-
-	.ledger-row dt {
-		font: var(--text-body-md);
-		color: var(--color-text-muted);
-		white-space: nowrap;
-	}
-
-	.ledger-row .leader {
-		flex: 1;
-		min-width: 0.75rem;
-		border-bottom: 2px dotted var(--color-border);
-		margin-bottom: 0.3em;
-	}
-
-	.ledger-row dd {
-		font: var(--text-label);
-		color: var(--color-ink);
-		margin: 0;
-		white-space: nowrap;
-		text-align: right;
-	}
-
-	/* Provisions: reuse the site's paw-print bullet motif */
+	/* Favorite Things: reuse the site's paw-print bullet motif. */
 	.provisions-list {
 		list-style: none;
 		margin: 0;
@@ -341,6 +323,20 @@
 	.hazard-icon {
 		flex-shrink: 0;
 		color: var(--color-panda-rust);
+	}
+
+	@media (max-width: 479px) {
+		.id-block {
+			flex-direction: column;
+		}
+
+		.id-info {
+			width: min(100%, 18rem);
+		}
+
+		h1 {
+			text-align: center;
+		}
 	}
 
 	@media (min-width: 768px) {

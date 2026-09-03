@@ -3,6 +3,7 @@
 	import PawPrint from '$lib/components/PawPrint.svelte';
 	import BambooStalk from '$lib/components/BambooStalk.svelte';
 	import BambooSprout from '$lib/components/BambooSprout.svelte';
+	import MediaActions from '$lib/components/MediaActions.svelte';
 
 	type GalleryEntry = {
 		id: string;
@@ -85,6 +86,9 @@
 						<span class="entry-caption">{entry.caption}</span>
 					</span>
 				</button>
+				{#if !showsPlaceholder(entry)}
+					<MediaActions asset={entry.image} label={entry.title} />
+				{/if}
 			</Card>
 		{/each}
 	</div>

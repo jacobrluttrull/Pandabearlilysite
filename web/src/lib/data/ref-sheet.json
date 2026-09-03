@@ -3,18 +3,18 @@
 		"id": "full-body",
 		"title": "Reference Sheet",
 		"caption": "Official reference sheet — lore, attributes, and base design.",
-		"image": "/images/refs/full-body.png"
+		"image": "/images/refs/full-body.jpg"
 	},
 	{
 		"id": "color-palette",
 		"title": "Color Palette",
 		"caption": "Official hex values for hair, outfit, and accent colors.",
-		"image": "/images/refs/color-palette.png"
+		"image": "/images/refs/color-palette.jpg"
 	},
 	{
 		"id": "outfit-variants",
 		"title": "Outfit Variants",
 		"caption": "Casual, formal, and alternate outfit looks.",
-		"image": "/images/refs/outfit-variants.png"
+		"image": "/images/refs/outfit-variants.jpg"
 	}
 ]

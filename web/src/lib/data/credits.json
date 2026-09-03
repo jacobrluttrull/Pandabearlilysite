@@ -2,30 +2,30 @@
 	{
 		"category": "Live2D Model",
 		"entries": [
-			{ "role": "Art", "name": "ku-ini", "url": "", "image": "/images/credits/model-art.png" },
-			{ "role": "Rigging", "name": "Willow", "url": "", "image": "/images/credits/live2d-rigging.png" }
+			{ "role": "Art", "name": "ku-ini", "url": "", "image": "/images/credits/model-art.jpg" },
+			{ "role": "Rigging", "name": "Willow", "url": "", "image": "/images/credits/live2d-rigging.jpg" }
 		]
 	},
 	{
 		"category": "Stream Assets & Screens",
 		"entries": [
 			{ "role": "Logo", "name": "TBD", "url": "", "image": "/images/credits/logo.png" },
-			{ "role": "Starting Screen", "name": "TBD", "url": "", "image": "/images/credits/starting-screen.png" },
-			{ "role": "Background", "name": "TBD", "url": "", "image": "/images/credits/background.png" },
-			{ "role": "Ending Screen", "name": "TBD", "url": "", "image": "/images/credits/ending-screen.png" }
+			{ "role": "Starting Screen", "name": "TBD", "url": "", "image": "/images/credits/starting-screen.mp4" },
+			{ "role": "Background", "name": "TBD", "url": "", "image": "/images/credits/background.jpg" },
+			{ "role": "Ending Screen", "name": "TBD", "url": "", "image": "/images/credits/ending-screen.jpg" }
 		]
 	},
 	{
 		"category": "Emotes",
 		"entries": [
-			{ "role": "Emote Set 1", "name": "cunibunny", "url": "", "image": "/images/credits/emote-artist-1.png" },
-			{ "role": "Emote Set 2", "name": "kyupo", "url": "", "image": "/images/credits/emote-artist-2.png" }
+			{ "role": "Emote Set 1", "name": "cunibunny", "url": "", "image": "/images/credits/emote-artist-1.jpg" },
+			{ "role": "Emote Set 2", "name": "kyupo", "url": "", "image": "/images/credits/emote-artist-2.jpg" }
 		]
 	},
 	{
 		"category": "Music",
 		"entries": [
-			{ "role": "BGM 1", "name": "nienta", "url": "", "image": "/images/credits/bgm-1.png" }
+			{ "role": "BGM 1", "name": "nienta", "url": "", "image": "/images/credits/bgm-1.jpg" }
 		]
 	}
 ]

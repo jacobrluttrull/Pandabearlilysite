@@ -45,12 +45,13 @@
 	/* Accent Rail (cream): a 3px forest-green top edge for featured cards —
 	   "a pop of color without overwhelming the beige palette" per the design
 	   doc. Bamboo already reads as accent-forward via its glass treatment, so
-	   it keeps the normal 1px border instead of gaining a second green cue. */
+	   it uses the normal glass-border color. The width stays 3px in both themes
+	   so switching themes cannot shift the card's contents or surrounding grid. */
 	.card.rail {
 		border-top: 3px solid var(--color-accent);
 	}
 
 	:global([data-theme='bamboo']) .card.rail {
-		border-top: 1px solid var(--surface-glass-border);
+		border-top-color: var(--surface-glass-border);
 	}
 </style>
